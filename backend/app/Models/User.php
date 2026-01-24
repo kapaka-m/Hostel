@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     public const ROLE_UNIVERSITY_ADMIN = 'UNIVERSITY_ADMIN';
     public const ROLE_DORM_ADMIN = 'DORM_ADMIN';
@@ -27,6 +28,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_active',
+        'frozen_at',
     ];
 
     /**
@@ -49,7 +52,19 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'frozen_at' => 'datetime',
         ];
+    }
+
+    public function isFrozen(): bool
+    {
+        return !$this->is_active || $this->frozen_at !== null;
+    }
+
+    public function isActive(): bool
+    {
+        return !$this->isFrozen();
     }
 
     public function dormAdmin()

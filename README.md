@@ -5,6 +5,7 @@ Developer: MOHAMED (KAPAKA)
 ## Overview
 
 Full-stack dorm management system with Laravel API + Blade admin panel and Flutter mobile app.
+Phase updates are tracked in `CHANGELOG.md`.
 
 ## Structure
 

@@ -23,6 +23,8 @@ class FloorController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorizeIfEnabled('viewAny', Floor::class);
+
         $dormId = $this->dormId($request);
 
         $floors = Floor::where('dorm_id', $dormId)->orderBy('number')->get();
@@ -33,6 +35,8 @@ class FloorController extends Controller
     public function store(FloorRequest $request)
     {
         $dormId = $this->dormId($request);
+
+        $this->authorizeIfEnabled('create', [Floor::class, $dormId]);
 
         $floor = Floor::create([
             'dorm_id' => $dormId,
@@ -53,6 +57,8 @@ class FloorController extends Controller
             abort(403);
         }
 
+        $this->authorizeIfEnabled('view', $floor);
+
         return new FloorResource($floor);
     }
 
@@ -63,6 +69,8 @@ class FloorController extends Controller
         if ($floor->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('update', $floor);
 
         $floor->update($request->validated());
 
@@ -76,6 +84,8 @@ class FloorController extends Controller
         if ($floor->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('delete', $floor);
 
         if ($floor->rooms()->exists()) {
             return response()->json([

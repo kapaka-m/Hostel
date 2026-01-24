@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Room;
 use App\Models\RoomAssignment;
 use App\Models\Student;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -52,6 +53,10 @@ class RoomAssignmentService
             ]);
 
             $this->updateRoomStatus($room->id);
+            app(AuditLogger::class)->log('assign_student', $assignment, null, [
+                'student_id' => $student->id,
+                'room_id' => $room->id,
+            ]);
 
             return $assignment;
         });
@@ -70,6 +75,11 @@ class RoomAssignmentService
         $assignment->active = false;
         $assignment->to_date = now();
         $assignment->save();
+
+        app(AuditLogger::class)->log('unassign_student', $assignment, null, [
+            'student_id' => $student->id,
+            'room_id' => $assignment->room_id,
+        ]);
 
         $this->updateRoomStatus($assignment->room_id);
     }

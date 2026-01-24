@@ -28,6 +28,8 @@ class RoomController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorizeIfEnabled('viewAny', Room::class);
+
         $dormId = $this->dormId($request);
 
         $query = Room::where('dorm_id', $dormId)->withCount('activeAssignments');
@@ -44,6 +46,8 @@ class RoomController extends Controller
     public function store(RoomRequest $request)
     {
         $dormId = $this->dormId($request);
+        $this->authorizeIfEnabled('create', [Room::class, $dormId]);
+
         $data = $request->validated();
 
         $floor = Floor::where('id', $data['floor_id'])
@@ -71,6 +75,8 @@ class RoomController extends Controller
             abort(403);
         }
 
+        $this->authorizeIfEnabled('view', $room);
+
         $room->loadCount('activeAssignments');
 
         return new RoomResource($room);
@@ -83,6 +89,8 @@ class RoomController extends Controller
         if ($room->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('update', $room);
 
         $data = $request->validated();
 
@@ -117,6 +125,8 @@ class RoomController extends Controller
             abort(403);
         }
 
+        $this->authorizeIfEnabled('delete', $room);
+
         if ($room->activeAssignments()->exists()) {
             return response()->json([
                 'message' => 'Cannot delete a room with active assignments.',
@@ -140,6 +150,8 @@ class RoomController extends Controller
             abort(403);
         }
 
+        $this->authorizeIfEnabled('assignStudent', $room);
+
         $student = Student::where('id', $request->validated()['student_id'])
             ->where('dorm_id', $dormId)
             ->firstOrFail();
@@ -160,6 +172,8 @@ class RoomController extends Controller
         if ($room->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('viewOccupants', $room);
 
         $students = Student::whereHas('activeAssignment', function ($query) use ($room) {
             $query->where('room_id', $room->id)->where('active', true);

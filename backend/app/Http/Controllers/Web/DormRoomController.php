@@ -26,6 +26,8 @@ class DormRoomController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorizeIfEnabled('viewAny', Room::class);
+
         $dormId = $this->dormId($request);
         $floors = Floor::where('dorm_id', $dormId)->orderBy('number')->get();
 
@@ -47,6 +49,9 @@ class DormRoomController extends Controller
     public function create(Request $request)
     {
         $dormId = $this->dormId($request);
+
+        $this->authorizeIfEnabled('create', [Room::class, $dormId]);
+
         $floors = Floor::where('dorm_id', $dormId)->orderBy('number')->get();
 
         return view('admin.dorm.rooms.form', [
@@ -58,6 +63,8 @@ class DormRoomController extends Controller
     public function store(RoomRequest $request)
     {
         $dormId = $this->dormId($request);
+        $this->authorizeIfEnabled('create', [Room::class, $dormId]);
+
         $data = $request->validated();
 
         $floor = Floor::where('id', $data['floor_id'])
@@ -83,6 +90,8 @@ class DormRoomController extends Controller
         if ($room->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('view', $room);
 
         $room->load(['floor'])->loadCount('activeAssignments');
 
@@ -110,6 +119,8 @@ class DormRoomController extends Controller
             abort(403);
         }
 
+        $this->authorizeIfEnabled('update', $room);
+
         $floors = Floor::where('dorm_id', $dormId)->orderBy('number')->get();
 
         return view('admin.dorm.rooms.form', [
@@ -125,6 +136,8 @@ class DormRoomController extends Controller
         if ($room->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('update', $room);
 
         $data = $request->validated();
 
@@ -158,6 +171,8 @@ class DormRoomController extends Controller
             abort(403);
         }
 
+        $this->authorizeIfEnabled('delete', $room);
+
         if ($room->activeAssignments()->exists()) {
             return redirect()->route('admin.dorm.rooms.index')
                 ->with('error', 'Cannot delete a room with active assignments.');
@@ -176,6 +191,8 @@ class DormRoomController extends Controller
         if ($room->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('assignStudent', $room);
 
         $student = Student::where('id', $request->validated()['student_id'])
             ->where('dorm_id', $dormId)

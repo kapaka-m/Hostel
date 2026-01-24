@@ -7,9 +7,11 @@ use App\Http\Requests\StudentRequest;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\RoomAssignmentService;
+use App\Support\FeatureFlags;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class DormStudentController extends Controller
 {
@@ -26,6 +28,8 @@ class DormStudentController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorizeIfEnabled('viewAny', Student::class);
+
         $dormId = $this->dormId($request);
 
         $students = Student::where('dorm_id', $dormId)
@@ -40,6 +44,8 @@ class DormStudentController extends Controller
 
     public function create()
     {
+        $this->authorizeIfEnabled('create', Student::class);
+
         return view('admin.dorm.students.form', [
             'student' => new Student(),
         ]);
@@ -48,6 +54,8 @@ class DormStudentController extends Controller
     public function store(StudentRequest $request)
     {
         $dormId = $this->dormId($request);
+        $this->authorizeIfEnabled('create', [Student::class, $dormId]);
+
         $data = $request->validated();
 
         $password = Str::random(10);
@@ -58,6 +66,11 @@ class DormStudentController extends Controller
             'password' => Hash::make($password),
             'role' => User::ROLE_STUDENT,
         ]);
+
+        if (FeatureFlags::enabled('permissions')) {
+            Role::findOrCreate($user->role);
+            $user->syncRoles([$user->role]);
+        }
 
         Student::create([
             'user_id' => $user->id,
@@ -80,6 +93,8 @@ class DormStudentController extends Controller
             abort(403);
         }
 
+        $this->authorizeIfEnabled('view', $student);
+
         return view('admin.dorm.students.form', [
             'student' => $student,
         ]);
@@ -92,6 +107,8 @@ class DormStudentController extends Controller
         if ($student->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('update', $student);
 
         $data = $request->validated();
 
@@ -132,6 +149,8 @@ class DormStudentController extends Controller
         if ($student->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('delete', $student);
 
         $service->deactivateStudentAssignment($student);
 

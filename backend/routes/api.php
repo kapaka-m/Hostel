@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\FloorController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\StudentRoomController;
+use App\Http\Controllers\Api\V2\ActivityFeedController;
+use App\Http\Controllers\Api\V2\AuditLogController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,5 +31,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:STUDENT')->group(function () {
         Route::get('/student/my-room', [StudentRoomController::class, 'myRoom']);
+    });
+});
+
+Route::prefix('v2')->middleware('auth:sanctum')->group(function () {
+    Route::middleware(['role:UNIVERSITY_ADMIN', 'feature:audit_logs'])->group(function () {
+        Route::get('/audit-logs', [AuditLogController::class, 'index']);
+    });
+
+    Route::middleware(['role:UNIVERSITY_ADMIN', 'feature:activity_feed'])->group(function () {
+        Route::get('/activity-feed', [ActivityFeedController::class, 'index']);
     });
 });

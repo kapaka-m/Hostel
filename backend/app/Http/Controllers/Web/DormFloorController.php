@@ -22,6 +22,8 @@ class DormFloorController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorizeIfEnabled('viewAny', Floor::class);
+
         $dormId = $this->dormId($request);
 
         $floors = Floor::where('dorm_id', $dormId)->orderBy('number')->get();
@@ -33,6 +35,8 @@ class DormFloorController extends Controller
 
     public function create()
     {
+        $this->authorizeIfEnabled('create', Floor::class);
+
         return view('admin.dorm.floors.form', [
             'floor' => new Floor(),
         ]);
@@ -41,6 +45,8 @@ class DormFloorController extends Controller
     public function store(FloorRequest $request)
     {
         $dormId = $this->dormId($request);
+
+        $this->authorizeIfEnabled('create', [Floor::class, $dormId]);
 
         Floor::create([
             'dorm_id' => $dormId,
@@ -62,6 +68,8 @@ class DormFloorController extends Controller
             abort(403);
         }
 
+        $this->authorizeIfEnabled('view', $floor);
+
         return view('admin.dorm.floors.form', [
             'floor' => $floor,
         ]);
@@ -74,6 +82,8 @@ class DormFloorController extends Controller
         if ($floor->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('update', $floor);
 
         $floor->update($request->validated());
 
@@ -88,6 +98,8 @@ class DormFloorController extends Controller
         if ($floor->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('delete', $floor);
 
         if ($floor->rooms()->exists()) {
             return redirect()->route('admin.dorm.floors.index')

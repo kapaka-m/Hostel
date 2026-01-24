@@ -8,9 +8,11 @@ use App\Http\Resources\StudentResource;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\RoomAssignmentService;
+use App\Support\FeatureFlags;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class StudentController extends Controller
 {
@@ -27,6 +29,8 @@ class StudentController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorizeIfEnabled('viewAny', Student::class);
+
         $dormId = $this->dormId($request);
 
         $students = Student::where('dorm_id', $dormId)
@@ -40,6 +44,8 @@ class StudentController extends Controller
     public function store(StudentRequest $request)
     {
         $dormId = $this->dormId($request);
+        $this->authorizeIfEnabled('create', [Student::class, $dormId]);
+
         $data = $request->validated();
 
         $password = Str::random(10);
@@ -50,6 +56,11 @@ class StudentController extends Controller
             'password' => Hash::make($password),
             'role' => User::ROLE_STUDENT,
         ]);
+
+        if (FeatureFlags::enabled('permissions')) {
+            Role::findOrCreate($user->role);
+            $user->syncRoles([$user->role]);
+        }
 
         $student = Student::create([
             'user_id' => $user->id,
@@ -77,6 +88,8 @@ class StudentController extends Controller
             abort(403);
         }
 
+        $this->authorizeIfEnabled('view', $student);
+
         $student->load('user');
 
         return new StudentResource($student);
@@ -89,6 +102,8 @@ class StudentController extends Controller
         if ($student->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('update', $student);
 
         $data = $request->validated();
 
@@ -130,6 +145,8 @@ class StudentController extends Controller
         if ($student->dorm_id !== $dormId) {
             abort(403);
         }
+
+        $this->authorizeIfEnabled('delete', $student);
 
         $service->deactivateStudentAssignment($student);
 

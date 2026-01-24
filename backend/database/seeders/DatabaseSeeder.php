@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call(SystemSettingsSeeder::class);
+
         $universityAdmin = User::create([
             'name' => 'University Admin',
             'email' => 'uniadmin@test.com',
@@ -94,5 +96,7 @@ class DatabaseSeeder extends Seeder
         if ($room101) {
             (new RoomAssignmentService())->assignStudentToRoom($student, $room101);
         }
+
+        $this->call(PermissionsSeeder::class);
     }
 }

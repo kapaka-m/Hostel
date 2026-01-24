@@ -7,12 +7,16 @@ use App\Http\Requests\CreateDormAdminRequest;
 use App\Models\Dorm;
 use App\Models\DormAdmin;
 use App\Models\User;
+use App\Support\FeatureFlags;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UniversityDormAdminController extends Controller
 {
     public function create()
     {
+        $this->authorizeIfEnabled('create', Dorm::class);
+
         $dorms = Dorm::orderBy('name')->get();
 
         return view('admin.university.dorm-admins.create', [
@@ -26,12 +30,19 @@ class UniversityDormAdminController extends Controller
 
         $dorm = Dorm::findOrFail($data['dorm_id']);
 
+        $this->authorizeIfEnabled('createDormAdmin', $dorm);
+
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => User::ROLE_DORM_ADMIN,
         ]);
+
+        if (FeatureFlags::enabled('permissions')) {
+            Role::findOrCreate($user->role);
+            $user->syncRoles([$user->role]);
+        }
 
         DormAdmin::create([
             'user_id' => $user->id,

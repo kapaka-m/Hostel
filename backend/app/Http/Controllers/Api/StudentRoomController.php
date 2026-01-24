@@ -23,6 +23,8 @@ class StudentRoomController extends Controller
             ], 404);
         }
 
+        $this->authorizeIfEnabled('viewMyRoom', $student);
+
         $assignment = $student->activeAssignment()->with('room.floor.dorm')->first();
 
         if (!$assignment) {

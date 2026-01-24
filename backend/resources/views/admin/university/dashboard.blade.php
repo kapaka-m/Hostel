@@ -6,6 +6,12 @@
         <div class="d-flex gap-2">
             <a href="{{ route('admin.university.dorms.index') }}" class="btn btn-outline-primary btn-sm">Manage Dorms</a>
             <a href="{{ route('admin.university.dorm-admins.create') }}" class="btn btn-primary btn-sm">Create Dorm Admin</a>
+            @if(\App\Support\FeatureFlags::enabled('activity_feed'))
+                <a href="{{ route('admin.university.activity-feed.index') }}" class="btn btn-outline-secondary btn-sm">Activity Feed</a>
+            @endif
+            @if(\App\Support\FeatureFlags::enabled('audit_logs'))
+                <a href="{{ route('admin.university.audit-logs.index') }}" class="btn btn-outline-secondary btn-sm">Audit Logs</a>
+            @endif
         </div>
     </div>
 

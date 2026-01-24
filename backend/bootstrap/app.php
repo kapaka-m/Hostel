@@ -7,7 +7,6 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use Throwable;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,6 +18,21 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'feature' => \App\Http\Middleware\FeatureFlagMiddleware::class,
+            'active' => \App\Http\Middleware\EnsureUserActive::class,
+            'admin.ip' => \App\Http\Middleware\AdminIpAllowlist::class,
+        ]);
+
+        $middleware->appendToGroup('api', [
+            \App\Http\Middleware\CorrelationIdMiddleware::class,
+            \App\Http\Middleware\ResponseTimeLoggerMiddleware::class,
+            \App\Http\Middleware\EnsureUserActive::class,
+        ]);
+
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\CorrelationIdMiddleware::class,
+            \App\Http\Middleware\ResponseTimeLoggerMiddleware::class,
+            \App\Http\Middleware\EnsureUserActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

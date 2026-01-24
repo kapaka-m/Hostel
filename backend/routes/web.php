@@ -5,6 +5,8 @@ use App\Http\Controllers\Web\DormDashboardController;
 use App\Http\Controllers\Web\DormFloorController;
 use App\Http\Controllers\Web\DormRoomController;
 use App\Http\Controllers\Web\DormStudentController;
+use App\Http\Controllers\Web\UniversityActivityFeedController;
+use App\Http\Controllers\Web\UniversityAuditLogController;
 use App\Http\Controllers\Web\UniversityDashboardController;
 use App\Http\Controllers\Web\UniversityDormAdminController;
 use App\Http\Controllers\Web\UniversityDormController;
@@ -18,8 +20,18 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware(['auth', 'role:UNIVERSITY_ADMIN'])->prefix('admin/university')->name('admin.university.')->group(function () {
+Route::middleware(['auth', 'role:UNIVERSITY_ADMIN', 'admin.ip'])->prefix('admin/university')->name('admin.university.')->group(function () {
     Route::get('/', [UniversityDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/activity-feed', [UniversityActivityFeedController::class, 'index'])
+        ->middleware('feature:activity_feed')
+        ->name('activity-feed.index');
+    Route::get('/activity-feed/data', [UniversityActivityFeedController::class, 'data'])
+        ->middleware('feature:activity_feed')
+        ->name('activity-feed.data');
+    Route::get('/audit-logs', [UniversityAuditLogController::class, 'index'])
+        ->middleware('feature:audit_logs')
+        ->name('audit-logs.index');
 
     Route::get('/dorms', [UniversityDormController::class, 'index'])->name('dorms.index');
     Route::get('/dorms/create', [UniversityDormController::class, 'create'])->name('dorms.create');
@@ -32,7 +44,7 @@ Route::middleware(['auth', 'role:UNIVERSITY_ADMIN'])->prefix('admin/university')
     Route::post('/dorm-admins', [UniversityDormAdminController::class, 'store'])->name('dorm-admins.store');
 });
 
-Route::middleware(['auth', 'role:DORM_ADMIN'])->prefix('admin/dorm')->name('admin.dorm.')->group(function () {
+Route::middleware(['auth', 'role:DORM_ADMIN', 'admin.ip'])->prefix('admin/dorm')->name('admin.dorm.')->group(function () {
     Route::get('/', [DormDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/floors', [DormFloorController::class, 'index'])->name('floors.index');

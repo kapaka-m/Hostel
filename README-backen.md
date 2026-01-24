@@ -68,3 +68,41 @@ php artisan serve
 - Session auth for web panel
 - Role-based authorization middleware
 - Room assignment with capacity enforcement and auto status updates
+
+## Feature Flags (Phase 1)
+
+Feature flags live in the `system_settings` table with keys in the `feature.*` namespace.
+Defaults are OFF to keep production behavior unchanged.
+
+Example toggle:
+
+```bash
+php artisan tinker
+>>> \App\Models\SystemSetting::updateOrCreate(['key' => 'feature.audit_logs'], ['value' => '1', 'type' => 'bool']);
+```
+
+Common flags:
+
+- `feature.audit_logs`
+- `feature.activity_feed`
+- `feature.permissions`
+- `feature.correlation_ids`
+- `feature.response_time_logging`
+- `feature.user_freeze`
+- `feature.strong_passwords`
+- `feature.admin_ip_allowlist`
+- `feature.suspicious_login_alerts`
+
+Admin IP allowlist:
+
+- `security.admin_ip_allowlist` (JSON array, e.g. `["127.0.0.1"]`)
+
+## New Phase 1 Endpoints
+
+- `GET /api/v2/activity-feed` (UNIVERSITY_ADMIN + `feature.activity_feed`)
+- `GET /api/v2/audit-logs` (UNIVERSITY_ADMIN + `feature.audit_logs`)
+
+## Admin Pages (Feature-Flagged)
+
+- `/admin/university/activity-feed`
+- `/admin/university/audit-logs`
