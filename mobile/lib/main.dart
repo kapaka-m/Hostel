@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hostel_mobile/src/app.dart';
-import 'package:hostel_mobile/src/data/api/api_client.dart';
-import 'package:hostel_mobile/src/data/storage/token_storage.dart';
-import 'package:hostel_mobile/src/domain/repositories/auth_repository.dart';
-import 'package:hostel_mobile/src/features/auth/auth_provider.dart';
+import 'package:hostel_mobile/src/api/api_client.dart';
+import 'package:hostel_mobile/src/auth/token_storage.dart';
+import 'package:hostel_mobile/src/api/repositories/auth_repository.dart';
+import 'package:hostel_mobile/src/auth/auth_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,3 +25,4 @@ Future<void> main() async {
     apiClient: apiClient,
   ));
 }
+

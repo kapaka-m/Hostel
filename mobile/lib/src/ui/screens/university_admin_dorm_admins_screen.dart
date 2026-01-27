@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:hostel_mobile/src/domain/models/dorm_model.dart';
-import 'package:hostel_mobile/src/domain/repositories/dorm_repository.dart';
-import 'package:hostel_mobile/src/ui/components/error_card.dart';
+import 'package:hostel_mobile/src/models/dorm_model.dart';
+import 'package:hostel_mobile/src/providers/dorm_admins_provider.dart';
+import 'package:hostel_mobile/src/providers/dorms_provider.dart';
+import 'package:hostel_mobile/src/ui/widgets/app_text_field.dart';
+import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
 
 class UniversityAdminDormAdminsScreen extends StatefulWidget {
   const UniversityAdminDormAdminsScreen({super.key});
 
   @override
-  State<UniversityAdminDormAdminsScreen> createState() => _UniversityAdminDormAdminsScreenState();
+  State<UniversityAdminDormAdminsScreen> createState() =>
+      _UniversityAdminDormAdminsScreenState();
 }
 
-class _UniversityAdminDormAdminsScreenState extends State<UniversityAdminDormAdminsScreen> {
-  late final Future<List<DormModel>> _dormsFuture;
+class _UniversityAdminDormAdminsScreenState
+    extends State<UniversityAdminDormAdminsScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   int? _selectedDormId;
-  bool _isSubmitting = false;
-  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _dormsFuture = context.read<DormRepository>().fetchDorms();
+    context.read<DormsProvider>().load();
   }
 
   @override
@@ -36,126 +38,125 @@ class _UniversityAdminDormAdminsScreenState extends State<UniversityAdminDormAdm
     super.dispose();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final dormsProvider = context.watch<DormsProvider>();
+    final adminsProvider = context.watch<DormAdminsProvider>();
+
+    if (dormsProvider.isLoading && dormsProvider.dorms.isEmpty) {
+      return const LoadingState(message: 'Loading dorms...');
+    }
+
+    if (dormsProvider.errorMessage != null && dormsProvider.dorms.isEmpty) {
+      return ErrorState(
+        message: dormsProvider.errorMessage!,
+        onRetry: () => dormsProvider.load(),
+      );
+    }
+
+    final dorms = dormsProvider.dorms;
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ListView(
+        children: [
+          Text('Dorm administrators', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 12),
+          const Card(
+            child: ListTile(
+              title: Text('Listing dorm admins is not available in the API.'),
+              subtitle: Text('Use the backend admin panel to review existing assignments.'),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text('Invite a dorm admin', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          if (adminsProvider.errorMessage != null)
+            ErrorState(message: adminsProvider.errorMessage!, onRetry: null),
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                DropdownButtonFormField<int>(
+                  key: ValueKey('dorm-${_selectedDormId ?? 'none'}'),
+                  initialValue: _selectedDormId,
+                  items: dorms
+                      .map((DormModel dorm) =>
+                          DropdownMenuItem(value: dorm.id, child: Text(dorm.name)))
+                      .toList(),
+                  decoration: const InputDecoration(labelText: 'Dorm'),
+                  onChanged:
+                      adminsProvider.isSubmitting ? null : (value) => setState(() => _selectedDormId = value),
+                  validator: (value) => value == null ? 'Select a dorm' : null,
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  controller: _nameController,
+                  label: 'Name',
+                  validator: (value) => value == null || value.isEmpty ? 'Name is required' : null,
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  controller: _emailController,
+                  label: 'Email',
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) => value == null || value.isEmpty ? 'Email is required' : null,
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  controller: _passwordController,
+                  label: 'Password',
+                  obscureText: true,
+                  validator: (value) =>
+                      (value?.length ?? 0) < 6 ? 'Password must be at least 6 characters' : null,
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: adminsProvider.isSubmitting ? null : _submit,
+                    child: adminsProvider.isSubmitting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Invite dorm admin'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || _selectedDormId == null) {
       return;
     }
 
-    setState(() {
-      _isSubmitting = true;
-      _errorMessage = null;
-    });
+    final provider = context.read<DormAdminsProvider>();
+    final success = await provider.createDormAdmin(
+      dormId: _selectedDormId!,
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
 
-    try {
-      await context.read<DormRepository>().inviteDormAdmin(
-            dormId: _selectedDormId!,
-            name: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          );
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dorm admin invited.')));
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dorm admin invited.')),
+      );
       _formKey.currentState?.reset();
       setState(() => _selectedDormId = null);
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      setState(() => _errorMessage = 'Unable to invite dorm admin.');
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(provider.errorMessage ?? 'Unable to invite dorm admin.')),
+      );
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<DormModel>>(
-      future: _dormsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return const Center(child: ErrorCard(message: 'Unable to load dorms.'));
-        }
-
-        final dorms = snapshot.data ?? [];
-
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: [
-              Text('Dorm administrators', style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 12),
-              const Card(
-                child: ListTile(
-                  title: Text('Listing dorm admins is not available via this API.'),
-                  subtitle: Text('Use the backend administration site to review existing assignments.'),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text('Invite a dorm admin', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 12),
-              if (_errorMessage != null) ErrorCard(message: _errorMessage!),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    DropdownButtonFormField<int>(
-                      initialValue: _selectedDormId,
-                      items: dorms
-                          .map((dorm) => DropdownMenuItem(value: dorm.id, child: Text(dorm.name)))
-                          .toList(),
-                      decoration: const InputDecoration(labelText: 'Dorm'),
-                      onChanged: _isSubmitting ? null : (value) => setState(() => _selectedDormId = value),
-                      validator: (value) => value == null ? 'Select a dorm' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(labelText: 'Name'),
-                      validator: (value) => value?.isEmpty ?? true ? 'Name is required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(labelText: 'Email'),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) => value?.isEmpty ?? true ? 'Email is required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: const InputDecoration(labelText: 'Password'),
-                      obscureText: true,
-                    validator: (value) => (value?.length ?? 0) < 6 ? 'Password must be at least 6 characters' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submit,
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text('Invite dorm admin'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 }

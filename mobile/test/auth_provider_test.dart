@@ -1,10 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:hostel_mobile/src/data/api/api_client.dart';
-import 'package:hostel_mobile/src/data/storage/token_storage.dart';
-import 'package:hostel_mobile/src/domain/models/user_model.dart';
-import 'package:hostel_mobile/src/domain/repositories/auth_repository.dart';
-import 'package:hostel_mobile/src/features/auth/auth_provider.dart';
+import 'package:hostel_mobile/src/api/api_client.dart';
+import 'package:hostel_mobile/src/auth/token_storage.dart';
+import 'package:hostel_mobile/src/models/user_model.dart';
+import 'package:hostel_mobile/src/api/repositories/auth_repository.dart';
+import 'package:hostel_mobile/src/auth/auth_provider.dart';
+import 'package:hostel_mobile/src/routing/app_router.dart';
 
 class FakeAuthRepository implements AuthRepository {
   late AuthSession sessionToReturn;
@@ -69,4 +70,22 @@ void main() {
     expect(storage.saved?.token, 'abc123');
     expect(client.lastToken, 'abc123');
   });
+
+  test('401 handling clears session and redirects to login', () async {
+    final repo = FakeAuthRepository();
+    final storage = FakeTokenStorage();
+    final client = FakeApiClient();
+    final user = UserModel(id: 1, name: 'Test', email: 'test@example.com', role: 'STUDENT');
+    repo.sessionToReturn = AuthSession(token: 'abc123', user: user);
+    repo.meUser = user;
+
+    final provider = AuthProvider(repo, storage, client);
+    await provider.login(email: 'test@example.com', password: 'password');
+    expect(provider.isAuthenticated, isTrue);
+
+    provider.handleUnauthorized();
+    expect(provider.isAuthenticated, isFalse);
+    expect(authRedirect(provider, '/student/home'), '/login');
+  });
 }
+

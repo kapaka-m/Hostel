@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'package:hostel_mobile/src/data/api/api_client.dart';
-import 'package:hostel_mobile/src/data/storage/token_storage.dart';
-import 'package:hostel_mobile/src/domain/models/user_model.dart';
-import 'package:hostel_mobile/src/domain/repositories/auth_repository.dart';
-import 'package:hostel_mobile/src/features/auth/auth_provider.dart';
+import 'package:hostel_mobile/src/api/api_client.dart';
+import 'package:hostel_mobile/src/auth/token_storage.dart';
+import 'package:hostel_mobile/src/models/user_model.dart';
+import 'package:hostel_mobile/src/api/repositories/auth_repository.dart';
+import 'package:hostel_mobile/src/auth/auth_provider.dart';
 import 'package:hostel_mobile/src/ui/screens/login_screen.dart';
 
 class FakeAuthRepository implements AuthRepository {
@@ -60,3 +60,4 @@ void main() {
     expect(find.text('Sign in'), findsOneWidget);
   });
 }
+

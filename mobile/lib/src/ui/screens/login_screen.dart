@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:hostel_mobile/src/features/auth/auth_provider.dart';
-import 'package:hostel_mobile/src/ui/components/error_card.dart';
+import 'package:hostel_mobile/src/auth/auth_provider.dart';
+import 'package:hostel_mobile/src/ui/strings.dart';
+import 'package:hostel_mobile/src/ui/widgets/app_text_field.dart';
+import 'package:hostel_mobile/src/ui/widgets/buttons.dart';
+import 'package:hostel_mobile/src/ui/widgets/error_card.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Hostel Mobile', style: Theme.of(context).textTheme.headlineMedium),
+                Text(AppStrings.appName, style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 8),
                 Text(
                   'Secure portal for students and admins',
@@ -51,38 +54,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      TextFormField(
+                      AppTextField(
                         controller: _emailController,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          errorText: _fieldError(errors, 'email'),
-                        ),
+                        label: 'Email',
                         keyboardType: TextInputType.emailAddress,
+                        errorText: _fieldError(errors, 'email'),
                         validator: (value) => value?.isEmpty ?? true ? 'Email is required' : null,
                       ),
                       const SizedBox(height: 12),
-                      TextFormField(
+                      AppTextField(
                         controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          errorText: _fieldError(errors, 'password'),
-                        ),
+                        label: 'Password',
                         obscureText: true,
+                        errorText: _fieldError(errors, 'password'),
                         validator: (value) => value?.isEmpty ?? true ? 'Password is required' : null,
                       ),
                       const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: auth.isLoading ? null : _submit,
-                          child: auth.isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('Sign in'),
-                        ),
+                      PrimaryButton(
+                        label: AppStrings.signIn,
+                        isLoading: auth.isLoading,
+                        onPressed: auth.isLoading ? null : _submit,
                       ),
                     ],
                   ),
@@ -120,3 +111,4 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 }
+

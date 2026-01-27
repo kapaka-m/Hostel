@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:hostel_mobile/src/domain/models/announcement_model.dart';
-import 'package:hostel_mobile/src/domain/models/student_room_assignment_model.dart';
-import 'package:hostel_mobile/src/domain/repositories/announcement_repository.dart';
-import 'package:hostel_mobile/src/domain/repositories/student_repository.dart';
-import 'package:hostel_mobile/src/features/student/student_provider.dart';
-import 'package:hostel_mobile/src/ui/components/empty_state.dart';
-import 'package:hostel_mobile/src/ui/components/error_card.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:hostel_mobile/src/models/announcement_model.dart';
+import 'package:hostel_mobile/src/models/student_room_assignment_model.dart';
+import 'package:hostel_mobile/src/providers/student_provider.dart';
+import 'package:hostel_mobile/src/ui/strings.dart';
+import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -17,69 +19,65 @@ class StudentHomeScreen extends StatefulWidget {
 }
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
-  late final StudentProvider _provider;
-
   @override
   void initState() {
     super.initState();
-    _provider = StudentProvider(
-      context.read<StudentRepository>(),
-      context.read<AnnouncementRepository>(),
-    );
-    _provider.load();
-  }
-
-  @override
-  void dispose() {
-    _provider.dispose();
-    super.dispose();
+    context.read<StudentProvider>().load();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<StudentProvider>.value(
-      value: _provider,
-      child: Consumer<StudentProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return Consumer<StudentProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const LoadingState(message: 'Loading your dashboard...');
+        }
 
-          if (provider.errorMessage != null) {
-            return Center(child: ErrorCard(message: provider.errorMessage!));
-          }
-
-          final assignment = provider.assignment;
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListView(
-              children: [
-                Text('Dashboard', style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 16),
-                if (assignment == null || assignment.room == null)
-                  const EmptyState(
-                    title: 'No room assignment yet',
-                    description: 'Contact your dorm admin to secure housing.',
-                  )
-                else
-                  _RoomCard(assignment: assignment),
-                const SizedBox(height: 24),
-                Text('Announcements', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 12),
-                if (provider.announcements.isEmpty)
-                  const EmptyState(
-                    title: 'No announcements',
-                    description: 'Important updates will appear here.',
-                  )
-                else
-                  ...provider.announcements
-                      .map((announcement) => _AnnouncementPreview(announcement: announcement))
-                      ,
-              ],
-            ),
+        if (provider.errorMessage != null) {
+          return ErrorState(
+            message: provider.errorMessage!,
+            onRetry: () => provider.load(),
           );
-        },
-      ),
+        }
+
+        final assignment = provider.assignment;
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ListView(
+            children: [
+              Text('Dashboard', style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 16),
+              if (assignment == null || assignment.room == null)
+                const EmptyState(
+                  title: 'No room assignment yet',
+                  description: 'Contact your dorm admin to secure housing.',
+                )
+              else
+                _RoomCard(assignment: assignment),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Announcements', style: Theme.of(context).textTheme.titleLarge),
+                  TextButton(
+                    onPressed: () => context.go('/student/announcements'),
+                    child: const Text(AppStrings.viewAll),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (provider.announcements.isEmpty)
+                const EmptyState(
+                  title: 'No announcements',
+                  description: 'Important updates will appear here.',
+                )
+              else
+                ...provider.announcements
+                    .map((announcement) => _AnnouncementPreview(announcement: announcement)),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -139,7 +137,9 @@ class _AnnouncementPreview extends StatelessWidget {
         title: Text(announcement.title),
         subtitle: Text(announcement.body, maxLines: 2, overflow: TextOverflow.ellipsis),
         trailing: Text(announcement.currentStatus ?? ''),
+        onTap: () => context.go('/student/announcements/${announcement.id}'),
       ),
     );
   }
 }
+

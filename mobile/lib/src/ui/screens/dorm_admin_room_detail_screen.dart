@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:hostel_mobile/src/data/api/api_client.dart';
-import 'package:hostel_mobile/src/domain/models/room_model.dart';
-import 'package:hostel_mobile/src/domain/models/student_model.dart';
-import 'package:hostel_mobile/src/domain/repositories/room_repository.dart';
-import 'package:hostel_mobile/src/features/dorm_admin/dorm_admin_provider.dart';
-import 'package:hostel_mobile/src/ui/components/error_card.dart';
+import 'package:hostel_mobile/src/api/api_client.dart';
+import 'package:hostel_mobile/src/api/repositories/room_repository.dart';
+import 'package:hostel_mobile/src/models/room_model.dart';
+import 'package:hostel_mobile/src/models/student_model.dart';
+import 'package:hostel_mobile/src/providers/rooms_provider.dart';
+import 'package:hostel_mobile/src/providers/students_provider.dart';
+import 'package:hostel_mobile/src/ui/widgets/error_card.dart';
 
 class DormAdminRoomDetailScreen extends StatefulWidget {
   final int roomId;
@@ -32,26 +33,29 @@ class _DormAdminRoomDetailScreenState extends State<DormAdminRoomDetailScreen> {
     final repository = context.read<RoomRepository>();
     _roomFuture = repository.fetchRoom(widget.roomId);
     _occupantsFuture = repository.fetchOccupants(widget.roomId);
+    context.read<StudentsProvider>().load();
   }
 
   Future<void> _assignStudent() async {
-    final provider = context.read<DormAdminProvider>();
+    final roomsProvider = context.read<RoomsProvider>();
     if (_selectedStudentId == null) {
       return;
     }
 
     setState(() => _isAssigning = true);
     try {
-      await provider.assignStudent(widget.roomId, _selectedStudentId!);
+      final success = await roomsProvider.assignStudent(widget.roomId, _selectedStudentId!);
       if (!mounted) {
         return;
       }
-      setState(() {
-        _occupantsFuture = context.read<RoomRepository>().fetchOccupants(widget.roomId);
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Student assigned successfully.')),
-      );
+      if (success) {
+        setState(() {
+          _occupantsFuture = context.read<RoomRepository>().fetchOccupants(widget.roomId);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Student assigned successfully.')),
+        );
+      }
     } catch (error) {
       if (!mounted) {
         return;
@@ -67,8 +71,8 @@ class _DormAdminRoomDetailScreenState extends State<DormAdminRoomDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<DormAdminProvider>();
-    final students = provider.students;
+    final studentsProvider = context.watch<StudentsProvider>();
+    final students = studentsProvider.students;
 
     return FutureBuilder<RoomModel>(
       future: _roomFuture,
@@ -156,3 +160,4 @@ class _DormAdminRoomDetailScreenState extends State<DormAdminRoomDetailScreen> {
     );
   }
 }
+

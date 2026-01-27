@@ -4,19 +4,22 @@ Lightweight Flutter client for the existing Larave backend. Material 3 styling, 
 
 ## Structure
 - `lib/src/app.dart` wires up providers, routing, and theming.
-- `lib/src/data` contains the Dio client, endpoint definitions, and token storage (secure on mobile/desktop, shared prefs on web).
-- `lib/src/domain` houses models and repositories for auth, rooms, dorms, tickets, and reports that map exactly to the backend resources.
-- `lib/src/features` implements ChangeNotifier-backed state for each role plus shared helpers.
-- `lib/src/ui` has reusable components, a theme palette, and Material screens tailored for UNIVERSITY_ADMIN, DORM_ADMIN, and STUDENT.
+- `lib/src/api` contains the Dio client, endpoint definitions, response parsing, and repositories.
+- `lib/src/auth` manages auth state and token storage (secure on mobile/desktop, shared prefs on web).
+- `lib/src/models` maps backend resources.
+- `lib/src/providers` implements ChangeNotifier-backed feature state for each role.
+- `lib/src/routing` defines go_router guards and role-aware shells.
+- `lib/src/ui` has reusable widgets and Material screens tailored for UNIVERSITY_ADMIN, DORM_ADMIN, and STUDENT.
+- `lib/src/theme` holds Material 3 theme configuration.
 - `scripts/clean.*` reset generated build outputs safely before fetching packages.
 
 ## Backend integration
 - Auth endpoints: `POST /api/login`, `GET /api/me`, `POST /api/logout` (token stored via FlutterSecureStorage/shared prefs depending on platform).
 - Student APIs: `/api/student/my-room`, `/api/v1/announcements`.
-- Dorm admin APIs: `/api/rooms`, `/api/rooms/{room}/assign-student`, `/api/rooms/{room}/occupants`, `/api/students`, `/api/v1/tickets`.
-- University admin APIs: `/api/dorms`, `/api/dorms/{dorm}/create-dorm-admin`, `/api/v1/reports/overview`, `/api/v1/tickets`.
+- Dorm admin APIs: `/api/floors`, `/api/rooms`, `/api/rooms/{room}/assign-student`, `/api/rooms/{room}/occupants`, `/api/students`, `/api/v1/tickets`, `/api/v1/announcements`.
+- University admin APIs: `/api/dorms`, `/api/dorms/{dorm}/create-dorm-admin`, `/api/v1/reports/overview`, `/api/v1/settings`, `/api/v2/activity-feed`, `/api/v2/audit-logs`, `/api/v1/tickets`, `/api/v1/announcements`.
 - Validation responses include `message` + `errors`; 401 triggers session reset and route redirect; `X-Correlation-Id` headers are logged in debug mode when available.
-- Missing backend features surfaced through stubs: student-side ticketing and CSV imports surface “Not available on this server” states without blocking navigation.
+- Feature-flagged modules (audit logs, activity feed) are hidden unless enabled in settings.
 
 ## Running
 ```bash

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:hostel_mobile/src/ui/components/empty_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
 
 class StudentTicketsStubScreen extends StatelessWidget {
   const StudentTicketsStubScreen({super.key});
@@ -16,3 +16,4 @@ class StudentTicketsStubScreen extends StatelessWidget {
     );
   }
 }
+
