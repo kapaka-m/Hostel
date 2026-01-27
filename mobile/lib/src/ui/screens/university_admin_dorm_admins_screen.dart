@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import 'package:hostel_mobile/src/domain/models/dorm_model.dart';
 import 'package:hostel_mobile/src/domain/repositories/dorm_repository.dart';
-import 'package:hostel_mobile/src/ui/components/empty_state.dart';
 import 'package:hostel_mobile/src/ui/components/error_card.dart';
 
 class UniversityAdminDormAdminsScreen extends StatefulWidget {
