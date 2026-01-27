@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:hostel_mobile/src/providers/settings_provider.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
 
 class UniversityAdminSettingsScreen extends StatefulWidget {
   const UniversityAdminSettingsScreen({super.key});
@@ -55,36 +56,60 @@ class _UniversityAdminSettingsScreenState extends State<UniversityAdminSettingsS
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            Text('Feature flags', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            ..._flags.entries.map(
-              (entry) => SwitchListTile(
-                title: Text(entry.key),
-                value: entry.value,
-                onChanged: (value) => setState(() => _flags[entry.key] = value),
+            const SectionHeader(title: 'Settings'),
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Feature flags', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    ..._flags.entries.map(
+                      (entry) => SwitchListTile(
+                        title: Text(entry.key),
+                        value: entry.value,
+                        contentPadding: EdgeInsets.zero,
+                        onChanged: (value) => setState(() => _flags[entry.key] = value),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            Text('Admin IP allowlist', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _allowlistController,
-              minLines: 3,
-              maxLines: 6,
-              decoration: const InputDecoration(
-                labelText: 'One IP per line',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text('Activity retention days', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _retentionController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Retention days',
-                border: OutlineInputBorder(),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Admin IP allowlist', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _allowlistController,
+                      minLines: 3,
+                      maxLines: 6,
+                      decoration: const InputDecoration(
+                        labelText: 'One IP per line',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('Activity retention days',
+                        style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _retentionController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Retention days',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),

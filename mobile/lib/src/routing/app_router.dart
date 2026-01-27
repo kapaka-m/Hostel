@@ -15,6 +15,8 @@ import 'package:hostel_mobile/src/ui/screens/dorm_admin_students_screen.dart';
 import 'package:hostel_mobile/src/ui/screens/dorm_admin_tickets_screen.dart';
 import 'package:hostel_mobile/src/ui/screens/login_screen.dart';
 import 'package:hostel_mobile/src/ui/screens/student_home_screen.dart';
+import 'package:hostel_mobile/src/ui/screens/student_profile_screen.dart';
+import 'package:hostel_mobile/src/ui/screens/student_room_screen.dart';
 import 'package:hostel_mobile/src/ui/screens/ticket_detail_screen.dart';
 import 'package:hostel_mobile/src/ui/screens/ticket_form_screen.dart';
 import 'package:hostel_mobile/src/ui/screens/university_admin_activity_feed_screen.dart';
@@ -41,11 +43,13 @@ GoRouter createAppRouter(AuthProvider authProvider) {
           title: 'Student',
           destinations: const [
             AppNavDestination(path: '/student/home', label: 'Home', icon: Icons.home),
+            AppNavDestination(path: '/student/room', label: 'My Room', icon: Icons.home_work),
             AppNavDestination(
               path: '/student/announcements',
               label: 'Announcements',
               icon: Icons.campaign,
             ),
+            AppNavDestination(path: '/student/profile', label: 'Profile', icon: Icons.person),
           ],
           currentLocation: state.location,
           child: child,
@@ -54,6 +58,10 @@ GoRouter createAppRouter(AuthProvider authProvider) {
           GoRoute(
             path: '/student/home',
             builder: (context, state) => const StudentHomeScreen(),
+          ),
+          GoRoute(
+            path: '/student/room',
+            builder: (context, state) => const StudentRoomScreen(),
           ),
           GoRoute(
             path: '/student/announcements',
@@ -66,6 +74,10 @@ GoRouter createAppRouter(AuthProvider authProvider) {
               announcementId: int.parse(state.pathParameters['id'] ?? '0'),
               basePath: '/student/announcements',
             ),
+          ),
+          GoRoute(
+            path: '/student/profile',
+            builder: (context, state) => const StudentProfileScreen(),
           ),
         ],
       ),

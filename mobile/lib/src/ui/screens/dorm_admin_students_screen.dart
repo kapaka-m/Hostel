@@ -8,6 +8,7 @@ import 'package:hostel_mobile/src/ui/widgets/confirm_dialog.dart';
 import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
 
 class DormAdminStudentsScreen extends StatefulWidget {
   const DormAdminStudentsScreen({super.key});
@@ -43,16 +44,10 @@ class _DormAdminStudentsScreenState extends State<DormAdminStudentsScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Row(
-              children: [
-                Text('Students', style: Theme.of(context).textTheme.titleLarge),
-                const Spacer(),
-                ElevatedButton.icon(
-                  onPressed: () => _openStudentForm(context),
-                  icon: const Icon(Icons.add),
-                  label: const Text('New student'),
-                ),
-              ],
+            SectionHeader(
+              title: 'Students',
+              actionLabel: 'New student',
+              onAction: () => _openStudentForm(context),
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -71,18 +66,24 @@ class _DormAdminStudentsScreenState extends State<DormAdminStudentsScreen> {
                             margin: const EdgeInsets.only(bottom: 12),
                             child: ListTile(
                               title: Text(student.fullName),
-                              subtitle: Text(student.studentNo),
-                              trailing: PopupMenuButton<String>(
-                                onSelected: (value) {
-                                  if (value == 'edit') {
-                                    _openStudentForm(context, existing: student);
-                                  } else if (value == 'delete') {
-                                    _deleteStudent(context, student);
-                                  }
-                                },
-                                itemBuilder: (context) => const [
-                                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                              subtitle: Text(student.email ?? student.studentNo),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(student.studentNo),
+                                  PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                      if (value == 'edit') {
+                                        _openStudentForm(context, existing: student);
+                                      } else if (value == 'delete') {
+                                        _deleteStudent(context, student);
+                                      }
+                                    },
+                                    itemBuilder: (context) => const [
+                                      PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                      PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),

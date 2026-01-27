@@ -43,7 +43,17 @@ class AppScaffold extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title),
+            if ((auth.user?.role ?? '').isNotEmpty)
+              Text(
+                auth.user?.role ?? '',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: themeProvider.isDark ? 'Switch to light mode' : 'Switch to dark mode',
@@ -52,21 +62,27 @@ class AppScaffold extends StatelessWidget {
               themeProvider.isDark ? ThemeMode.light : ThemeMode.dark,
             ),
           ),
+          if (!useDrawer && isWide)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Center(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      child: Text(_initials(auth.user?.name)),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(auth.user?.name ?? 'Guest'),
+                  ],
+                ),
+              ),
+            ),
           IconButton(
             tooltip: 'Sign out',
             icon: const Icon(Icons.logout),
             onPressed: () => auth.logout(),
           ),
-          if (!useDrawer && isWide)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Center(
-                child: Text(
-                  auth.user?.name ?? 'Guest',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ),
-            ),
         ],
       ),
       drawer: useDrawer ? _buildDrawer(context) : null,
@@ -110,9 +126,9 @@ class AppScaffold extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: [
             ListTile(
+              leading: CircleAvatar(child: Text(_initials(auth.user?.name))),
               title: Text(auth.user?.name ?? 'Guest'),
               subtitle: Text(auth.user?.role ?? ''),
-              leading: const Icon(Icons.account_circle),
             ),
             const Divider(),
             ...destinations.map((destination) => ListTile(
@@ -143,5 +159,16 @@ class AppScaffold extends StatelessWidget {
     if (GoRouter.of(context).location != path) {
       context.go(path);
     }
+  }
+
+  String _initials(String? name) {
+    if (name == null || name.trim().isEmpty) {
+      return 'U';
+    }
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.length == 1) {
+      return parts.first.substring(0, 1).toUpperCase();
+    }
+    return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
   }
 }

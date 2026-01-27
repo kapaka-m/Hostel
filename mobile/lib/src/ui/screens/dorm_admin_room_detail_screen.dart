@@ -8,6 +8,9 @@ import 'package:hostel_mobile/src/models/student_model.dart';
 import 'package:hostel_mobile/src/providers/rooms_provider.dart';
 import 'package:hostel_mobile/src/providers/students_provider.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_card.dart';
+import 'package:hostel_mobile/src/ui/widgets/info_row.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
+import 'package:hostel_mobile/src/ui/widgets/status_badge.dart';
 
 class DormAdminRoomDetailScreen extends StatefulWidget {
   final int roomId;
@@ -91,13 +94,28 @@ class _DormAdminRoomDetailScreenState extends State<DormAdminRoomDetailScreen> {
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: [
-              Text('Room ${room.roomNumber}', style: Theme.of(context).textTheme.headlineSmall),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Room ${room.roomNumber}', style: Theme.of(context).textTheme.headlineSmall),
+                  StatusBadge(label: room.status, kind: StatusKind.room),
+                ],
+              ),
               const SizedBox(height: 12),
-              Text('Capacity: ${room.capacity}'),
-              Text('Occupancy: ${room.occupancy}'),
-              Text('Status: ${room.status ?? 'Unknown'}'),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      InfoRow(label: 'Capacity', value: room.capacity.toString()),
+                      const SizedBox(height: 8),
+                      InfoRow(label: 'Occupancy', value: room.occupancy.toString()),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
-              Text('Assign a student', style: Theme.of(context).textTheme.titleMedium),
+              const SectionHeader(title: 'Assign a student'),
               const SizedBox(height: 8),
               DropdownButtonFormField<int>(
                 initialValue: _selectedStudentId,
@@ -125,7 +143,7 @@ class _DormAdminRoomDetailScreenState extends State<DormAdminRoomDetailScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              Text('Occupants', style: Theme.of(context).textTheme.titleMedium),
+              const SectionHeader(title: 'Occupants'),
               const SizedBox(height: 8),
               FutureBuilder<List<StudentModel>>(
                 future: _occupantsFuture,

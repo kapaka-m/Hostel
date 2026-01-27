@@ -7,6 +7,7 @@ import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/paginated_list_view.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
 
 class UniversityAdminAuditLogsScreen extends StatefulWidget {
   const UniversityAdminAuditLogsScreen({super.key});
@@ -47,27 +48,39 @@ class _UniversityAdminAuditLogsScreenState extends State<UniversityAdminAuditLog
 
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: PaginatedListView<AuditLogModel>(
-        items: provider.logs,
-        hasMore: provider.hasMore,
-        isLoadingMore: provider.isLoadingMore,
-        onLoadMore: provider.loadMore,
-        onRefresh: () => provider.load(refresh: true),
-        emptyState: const EmptyState(
-          title: 'No audit logs yet',
-          description: 'Recent actions will appear here.',
-        ),
-        itemBuilder: (context, log) => Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            title: Text(log.action ?? 'Action'),
-            subtitle: Text('${log.entityType ?? 'Entity'} #${log.entityId ?? ''}'),
-            trailing: Text(
-              log.createdAt?.toLocal().toString().split('.').first ?? '',
-              style: Theme.of(context).textTheme.bodySmall,
+      child: Column(
+        children: [
+          const SectionHeader(title: 'Audit logs'),
+          const SizedBox(height: 12),
+          Expanded(
+            child: PaginatedListView<AuditLogModel>(
+              items: provider.logs,
+              hasMore: provider.hasMore,
+              isLoadingMore: provider.isLoadingMore,
+              onLoadMore: provider.loadMore,
+              onRefresh: () => provider.load(refresh: true),
+              emptyState: const EmptyState(
+                title: 'No audit logs yet',
+                description: 'Recent actions will appear here.',
+              ),
+              itemBuilder: (context, log) => Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  title: Text(log.action ?? 'Action'),
+                  subtitle: Text(
+                    '${log.entityType ?? 'Entity'} #${log.entityId ?? ''}\n'
+                    'Actor: ${log.actor?.name ?? 'System'}',
+                  ),
+                  isThreeLine: true,
+                  trailing: Text(
+                    log.createdAt?.toLocal().toString().split('.').first ?? '',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

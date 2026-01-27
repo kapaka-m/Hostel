@@ -8,6 +8,7 @@ import 'package:hostel_mobile/src/ui/widgets/confirm_dialog.dart';
 import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
 
 class DormAdminFloorsScreen extends StatefulWidget {
   const DormAdminFloorsScreen({super.key});
@@ -46,42 +47,50 @@ class _DormAdminFloorsScreenState extends State<DormAdminFloorsScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: provider.floors.isEmpty
-            ? const EmptyState(
-                title: 'No floors yet',
-                description: 'Create floors to organize rooms.',
-              )
-            : RefreshIndicator(
-                onRefresh: () => provider.load(),
-                child: ListView.builder(
-                  itemCount: provider.floors.length,
-                  itemBuilder: (context, index) {
-                    final floor = provider.floors[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        title: Text('Floor ${floor.number}'),
-                        subtitle: Text(
-                          'Bathrooms: ${floor.bathrooms ?? 0} | Kitchens: ${floor.kitchens ?? 0}',
-                        ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              _openFloorForm(context, existing: floor);
-                            } else if (value == 'delete') {
-                              _deleteFloor(context, floor);
-                            }
-                          },
-                          itemBuilder: (context) => const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete')),
-                          ],
-                        ),
+        child: Column(
+          children: [
+            const SectionHeader(title: 'Floors'),
+            const SizedBox(height: 12),
+            Expanded(
+              child: provider.floors.isEmpty
+                  ? const EmptyState(
+                      title: 'No floors yet',
+                      description: 'Create floors to organize rooms.',
+                    )
+                  : RefreshIndicator(
+                      onRefresh: () => provider.load(),
+                      child: ListView.builder(
+                        itemCount: provider.floors.length,
+                        itemBuilder: (context, index) {
+                          final floor = provider.floors[index];
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: ListTile(
+                              title: Text('Floor ${floor.number}'),
+                              subtitle: Text(
+                                'Bathrooms: ${floor.bathrooms ?? 0} | Kitchens: ${floor.kitchens ?? 0}',
+                              ),
+                              trailing: PopupMenuButton<String>(
+                                onSelected: (value) {
+                                  if (value == 'edit') {
+                                    _openFloorForm(context, existing: floor);
+                                  } else if (value == 'delete') {
+                                    _deleteFloor(context, floor);
+                                  }
+                                },
+                                itemBuilder: (context) => const [
+                                  PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

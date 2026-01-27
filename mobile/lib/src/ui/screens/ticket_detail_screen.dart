@@ -8,6 +8,8 @@ import 'package:hostel_mobile/src/models/ticket_model.dart';
 import 'package:hostel_mobile/src/providers/tickets_provider.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/info_row.dart';
+import 'package:hostel_mobile/src/ui/widgets/status_badge.dart';
 
 class TicketDetailScreen extends StatefulWidget {
   final int ticketId;
@@ -90,9 +92,38 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
               const SizedBox(height: 16),
               Text(ticket.subject, style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 8),
-              Text('Status: ${ticket.status ?? 'Unknown'}'),
-              Text('Priority: ${ticket.priority ?? 'Medium'}'),
-              if (ticket.category != null) Text('Category: ${ticket.category}'),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  StatusBadge(label: ticket.status, kind: StatusKind.ticket),
+                  StatusBadge(label: ticket.priority, kind: StatusKind.generic),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      InfoRow(
+                        label: 'Category',
+                        value: ticket.category ?? 'General',
+                      ),
+                      const SizedBox(height: 8),
+                      InfoRow(
+                        label: 'Dorm',
+                        value: ticket.dorm?.name ?? 'N/A',
+                      ),
+                      const SizedBox(height: 8),
+                      InfoRow(
+                        label: 'Assignee',
+                        value: ticket.assignee?.name ?? 'Unassigned',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 16),
               Text(ticket.description, style: Theme.of(context).textTheme.bodyLarge),
               const SizedBox(height: 24),

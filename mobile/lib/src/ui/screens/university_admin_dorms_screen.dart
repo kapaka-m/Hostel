@@ -8,6 +8,8 @@ import 'package:hostel_mobile/src/ui/widgets/confirm_dialog.dart';
 import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
+import 'package:hostel_mobile/src/ui/widgets/status_badge.dart';
 
 class UniversityAdminDormsScreen extends StatefulWidget {
   const UniversityAdminDormsScreen({super.key});
@@ -46,40 +48,55 @@ class _UniversityAdminDormsScreenState extends State<UniversityAdminDormsScreen>
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: provider.dorms.isEmpty
-            ? const EmptyState(
-                title: 'No dorms yet',
-                description: 'Create your first dorm to start managing occupancy.',
-              )
-            : RefreshIndicator(
-                onRefresh: () => provider.load(),
-                child: ListView.builder(
-                  itemCount: provider.dorms.length,
-                  itemBuilder: (context, index) {
-                    final dorm = provider.dorms[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        title: Text(dorm.name),
-                        subtitle: Text(dorm.address ?? 'No address'),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              _openDormForm(context, existing: dorm);
-                            } else if (value == 'delete') {
-                              _deleteDorm(context, dorm);
-                            }
-                          },
-                          itemBuilder: (context) => const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete')),
-                          ],
-                        ),
+        child: Column(
+          children: [
+            const SectionHeader(title: 'Dorms'),
+            const SizedBox(height: 12),
+            Expanded(
+              child: provider.dorms.isEmpty
+                  ? const EmptyState(
+                      title: 'No dorms yet',
+                      description: 'Create your first dorm to start managing occupancy.',
+                    )
+                  : RefreshIndicator(
+                      onRefresh: () => provider.load(),
+                      child: ListView.builder(
+                        itemCount: provider.dorms.length,
+                        itemBuilder: (context, index) {
+                          final dorm = provider.dorms[index];
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: ListTile(
+                              title: Text(dorm.name),
+                              subtitle: Text(dorm.address ?? 'No address'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  StatusBadge(label: dorm.status, kind: StatusKind.generic),
+                                  const SizedBox(width: 8),
+                                  PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                      if (value == 'edit') {
+                                        _openDormForm(context, existing: dorm);
+                                      } else if (value == 'delete') {
+                                        _deleteDorm(context, dorm);
+                                      }
+                                    },
+                                    itemBuilder: (context) => const [
+                                      PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                      PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

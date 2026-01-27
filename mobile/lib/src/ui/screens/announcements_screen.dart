@@ -9,6 +9,8 @@ import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/paginated_list_view.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
+import 'package:hostel_mobile/src/ui/widgets/status_badge.dart';
 
 class AnnouncementsScreen extends StatefulWidget {
   final String basePath;
@@ -63,6 +65,8 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            const SectionHeader(title: 'Announcements'),
+            const SizedBox(height: 12),
             _FiltersRow(
               status: _status,
               audience: _audience,
@@ -98,7 +102,10 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    trailing: Text(announcement.currentStatus ?? ''),
+                    trailing: StatusBadge(
+                      label: announcement.currentStatus ?? announcement.status,
+                      kind: StatusKind.announcement,
+                    ),
                     onTap: () => context.go('${widget.basePath}/${announcement.id}'),
                   ),
                 ),

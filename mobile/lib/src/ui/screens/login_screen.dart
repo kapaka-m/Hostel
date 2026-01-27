@@ -31,54 +31,75 @@ class _LoginScreenState extends State<LoginScreen> {
     final auth = context.watch<AuthProvider>();
     final errors = auth.validationErrors;
 
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(AppStrings.appName, style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 8),
-                Text(
-                  'Secure portal for students and admins',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                if (auth.errorMessage != null)
-                  ErrorCard(message: auth.errorMessage ?? 'Unable to sign in.'),
-                Form(
-                  key: _formKey,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              scheme.primary.withAlpha(25),
+              scheme.tertiary.withAlpha(18),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      AppTextField(
-                        controller: _emailController,
-                        label: 'Email',
-                        keyboardType: TextInputType.emailAddress,
-                        errorText: _fieldError(errors, 'email'),
-                        validator: (value) => value?.isEmpty ?? true ? 'Email is required' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      AppTextField(
-                        controller: _passwordController,
-                        label: 'Password',
-                        obscureText: true,
-                        errorText: _fieldError(errors, 'password'),
-                        validator: (value) => value?.isEmpty ?? true ? 'Password is required' : null,
+                      Text(AppStrings.appName,
+                          style: Theme.of(context).textTheme.headlineMedium),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Secure portal for students and admins',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
-                      PrimaryButton(
-                        label: AppStrings.signIn,
-                        isLoading: auth.isLoading,
-                        onPressed: auth.isLoading ? null : _submit,
+                      if (auth.errorMessage != null)
+                        ErrorCard(message: auth.errorMessage ?? 'Unable to sign in.'),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            AppTextField(
+                              controller: _emailController,
+                              label: 'Email',
+                              keyboardType: TextInputType.emailAddress,
+                              errorText: _fieldError(errors, 'email'),
+                              validator: (value) =>
+                                  value?.isEmpty ?? true ? 'Email is required' : null,
+                            ),
+                            const SizedBox(height: 12),
+                            AppTextField(
+                              controller: _passwordController,
+                              label: 'Password',
+                              obscureText: true,
+                              errorText: _fieldError(errors, 'password'),
+                              validator: (value) =>
+                                  value?.isEmpty ?? true ? 'Password is required' : null,
+                            ),
+                            const SizedBox(height: 24),
+                            PrimaryButton(
+                              label: AppStrings.signIn,
+                              isLoading: auth.isLoading,
+                              onPressed: auth.isLoading ? null : _submit,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),

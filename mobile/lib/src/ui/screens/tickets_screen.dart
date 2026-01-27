@@ -9,6 +9,8 @@ import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/paginated_list_view.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
+import 'package:hostel_mobile/src/ui/widgets/status_badge.dart';
 
 class TicketsScreen extends StatefulWidget {
   final String basePath;
@@ -70,6 +72,8 @@ class _TicketsScreenState extends State<TicketsScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            const SectionHeader(title: 'Tickets'),
+            const SizedBox(height: 12),
             _FilterRow(
               controller: _searchController,
               status: _status,
@@ -108,8 +112,13 @@ class _TicketsScreenState extends State<TicketsScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     title: Text(ticket.subject),
-                    subtitle: Text(
-                      'Status: ${ticket.status ?? 'Unknown'} | Priority: ${ticket.priority ?? 'MEDIUM'}',
+                    subtitle: Text(ticket.category ?? 'General request'),
+                    trailing: Wrap(
+                      spacing: 8,
+                      children: [
+                        StatusBadge(label: ticket.priority, kind: StatusKind.generic),
+                        StatusBadge(label: ticket.status, kind: StatusKind.ticket),
+                      ],
                     ),
                     onTap: () => context.go('${widget.basePath}/${ticket.id}'),
                   ),

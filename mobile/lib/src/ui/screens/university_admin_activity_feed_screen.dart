@@ -6,6 +6,7 @@ import 'package:hostel_mobile/src/providers/activity_feed_provider.dart';
 import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
 
 class UniversityAdminActivityFeedScreen extends StatefulWidget {
   const UniversityAdminActivityFeedScreen({super.key});
@@ -46,21 +47,29 @@ class _UniversityAdminActivityFeedScreenState extends State<UniversityAdminActiv
 
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: provider.entries.isEmpty
-          ? const EmptyState(
-              title: 'No activity yet',
-              description: 'Recent actions will appear here.',
-            )
-          : RefreshIndicator(
-              onRefresh: () => provider.load(),
-              child: ListView.builder(
-                itemCount: provider.entries.length,
-                itemBuilder: (context, index) {
-                  final log = provider.entries[index];
-                  return _LogTile(log: log);
-                },
-              ),
-            ),
+      child: Column(
+        children: [
+          const SectionHeader(title: 'Activity feed'),
+          const SizedBox(height: 12),
+          Expanded(
+            child: provider.entries.isEmpty
+                ? const EmptyState(
+                    title: 'No activity yet',
+                    description: 'Recent actions will appear here.',
+                  )
+                : RefreshIndicator(
+                    onRefresh: () => provider.load(),
+                    child: ListView.builder(
+                      itemCount: provider.entries.length,
+                      itemBuilder: (context, index) {
+                        final log = provider.entries[index];
+                        return _LogTile(log: log);
+                      },
+                    ),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -76,7 +85,11 @@ class _LogTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         title: Text(log.action ?? 'Action'),
-        subtitle: Text('${log.entityType ?? 'Entity'} #${log.entityId ?? ''}'),
+        subtitle: Text(
+          '${log.entityType ?? 'Entity'} #${log.entityId ?? ''}\n'
+          'Actor: ${log.actor?.name ?? 'System'}',
+        ),
+        isThreeLine: true,
         trailing: Text(
           log.createdAt?.toLocal().toString().split('.').first ?? '',
           style: Theme.of(context).textTheme.bodySmall,

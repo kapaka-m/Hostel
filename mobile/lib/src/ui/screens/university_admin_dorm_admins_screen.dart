@@ -7,6 +7,7 @@ import 'package:hostel_mobile/src/providers/dorms_provider.dart';
 import 'package:hostel_mobile/src/ui/widgets/app_text_field.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
 
 class UniversityAdminDormAdminsScreen extends StatefulWidget {
   const UniversityAdminDormAdminsScreen({super.key});
@@ -60,7 +61,7 @@ class _UniversityAdminDormAdminsScreenState
       padding: const EdgeInsets.all(16),
       child: ListView(
         children: [
-          Text('Dorm administrators', style: Theme.of(context).textTheme.headlineSmall),
+          const SectionHeader(title: 'Dorm administrators'),
           const SizedBox(height: 12),
           const Card(
             child: ListTile(
@@ -69,7 +70,7 @@ class _UniversityAdminDormAdminsScreenState
             ),
           ),
           const SizedBox(height: 24),
-          Text('Invite a dorm admin', style: Theme.of(context).textTheme.titleLarge),
+          const SectionHeader(title: 'Invite a dorm admin'),
           const SizedBox(height: 12),
           if (adminsProvider.errorMessage != null)
             ErrorState(message: adminsProvider.errorMessage!, onRetry: null),

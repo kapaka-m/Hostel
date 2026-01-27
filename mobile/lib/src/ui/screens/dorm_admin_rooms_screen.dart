@@ -11,6 +11,8 @@ import 'package:hostel_mobile/src/ui/widgets/confirm_dialog.dart';
 import 'package:hostel_mobile/src/ui/widgets/empty_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/error_state.dart';
 import 'package:hostel_mobile/src/ui/widgets/loading_state.dart';
+import 'package:hostel_mobile/src/ui/widgets/section_header.dart';
+import 'package:hostel_mobile/src/ui/widgets/status_badge.dart';
 
 class DormAdminRoomsScreen extends StatefulWidget {
   const DormAdminRoomsScreen({super.key});
@@ -52,6 +54,8 @@ class _DormAdminRoomsScreenState extends State<DormAdminRoomsScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            const SectionHeader(title: 'Rooms'),
+            const SizedBox(height: 12),
             _FiltersRow(
               floors: floorsProvider.floors,
               selectedFloorId: _selectedFloorId,
@@ -79,17 +83,24 @@ class _DormAdminRoomsScreenState extends State<DormAdminRoomsScreen> {
                             child: ListTile(
                               title: Text('Room ${room.roomNumber}'),
                               subtitle: Text('Occupancy: ${room.occupancy}/${room.capacity}'),
-                              trailing: PopupMenuButton<String>(
-                                onSelected: (value) {
-                                  if (value == 'edit') {
-                                    _openRoomForm(context, existing: room);
-                                  } else if (value == 'delete') {
-                                    _deleteRoom(context, room);
-                                  }
-                                },
-                                itemBuilder: (context) => const [
-                                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  StatusBadge(label: room.status, kind: StatusKind.room),
+                                  const SizedBox(width: 8),
+                                  PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                      if (value == 'edit') {
+                                        _openRoomForm(context, existing: room);
+                                      } else if (value == 'delete') {
+                                        _deleteRoom(context, room);
+                                      }
+                                    },
+                                    itemBuilder: (context) => const [
+                                      PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                      PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                    ],
+                                  ),
                                 ],
                               ),
                               onTap: () => context.go('/dorm-admin/rooms/${room.id}'),
