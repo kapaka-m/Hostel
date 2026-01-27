@@ -2,12 +2,6 @@
   "configurations": [
     {
       "name": "Windows Runner",
-      "includePath": [
-        "${workspaceFolder}/mobile/windows/flutter/ephemeral",
-        "${workspaceFolder}/mobile/windows/flutter/ephemeral/cpp_client_wrapper/include",
-        "${workspaceFolder}/mobile/windows",
-        "${workspaceFolder}/mobile/windows/runner"
-      ],
       "defines": [
         "_WINDOWS",
         "UNICODE",

@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.kapaka.hostel" "\0"
-            VALUE "FileDescription", "hostel" "\0"
+            VALUE "FileDescription", "hostel_mobile" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "hostel" "\0"
+            VALUE "InternalName", "hostel_mobile" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.kapaka.hostel. All rights reserved." "\0"
-            VALUE "OriginalFilename", "hostel.exe" "\0"
-            VALUE "ProductName", "hostel" "\0"
+            VALUE "OriginalFilename", "hostel_mobile.exe" "\0"
+            VALUE "ProductName", "hostel_mobile" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

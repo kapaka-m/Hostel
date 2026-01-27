@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\AuditLog;
 use App\Models\SystemSetting;
+use App\Models\University;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -23,6 +24,7 @@ class AuditLogTest extends TestCase
 
         $user = User::factory()->create([
             'role' => User::ROLE_UNIVERSITY_ADMIN,
+            'university_id' => University::create(['name' => 'Uni A', 'code' => 'UNIA'])->id,
         ]);
 
         Sanctum::actingAs($user);

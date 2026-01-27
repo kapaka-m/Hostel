@@ -1,6 +1,3 @@
-import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.api.dsl.LibraryExtension
-
 allprojects {
     repositories {
         google()
@@ -17,19 +14,6 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
-
-    plugins.withId("com.android.library") {
-        val appCompileSdk =
-            rootProject.project(":app")
-                .extensions
-                .findByType<ApplicationExtension>()
-                ?.compileSdk
-        if (appCompileSdk != null) {
-            extensions.configure<LibraryExtension> {
-                compileSdk = appCompileSdk
-            }
-        }
-    }
 }
 subprojects {
     project.evaluationDependsOn(":app")

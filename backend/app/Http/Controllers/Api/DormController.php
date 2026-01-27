@@ -11,23 +11,32 @@ use App\Models\Dorm;
 use App\Models\DormAdmin;
 use App\Models\User;
 use App\Support\FeatureFlags;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
 class DormController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorizeIfEnabled('viewAny', Dorm::class);
 
-        return DormResource::collection(Dorm::orderBy('name')->get());
+        $universityId = $this->requireUniversityId($request);
+
+        return DormResource::collection(
+            Dorm::where('university_id', $universityId)->orderBy('name')->get()
+        );
     }
 
     public function store(DormRequest $request)
     {
         $this->authorizeIfEnabled('create', Dorm::class);
 
-        $dorm = Dorm::create($request->validated());
+        $universityId = $this->requireUniversityId($request);
+
+        $dorm = Dorm::create(array_merge($request->validated(), [
+            'university_id' => $universityId,
+        ]));
 
         return new DormResource($dorm);
     }
@@ -63,12 +72,14 @@ class DormController extends Controller
     public function createDormAdmin(CreateDormAdminRequest $request, Dorm $dorm)
     {
         $this->authorizeIfEnabled('createDormAdmin', $dorm);
+        $universityId = $this->requireUniversityId($request);
 
         $user = User::create([
             'name' => $request->validated()['name'],
             'email' => $request->validated()['email'],
             'password' => Hash::make($request->validated()['password']),
             'role' => User::ROLE_DORM_ADMIN,
+            'university_id' => $universityId,
         ]);
 
         if (FeatureFlags::enabled('permissions')) {

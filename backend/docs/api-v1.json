@@ -1,0 +1,242 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Hostel API v1",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/"
+        }
+    ],
+    "paths": {
+        "/api/v1/tickets": {
+            "get": {
+                "summary": "List tickets",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ticket list"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create ticket",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Ticket created"
+                    }
+                }
+            }
+        },
+        "/api/v1/tickets/{ticket}": {
+            "get": {
+                "summary": "Get ticket",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ticket detail"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update ticket",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ticket updated"
+                    }
+                }
+            }
+        },
+        "/api/v1/tickets/{ticket}/comments": {
+            "post": {
+                "summary": "Add ticket comment",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Comment created"
+                    }
+                }
+            }
+        },
+        "/api/v1/announcements": {
+            "get": {
+                "summary": "List announcements",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Announcement list"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create announcement",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Announcement created"
+                    }
+                }
+            }
+        },
+        "/api/v1/announcements/{announcement}": {
+            "get": {
+                "summary": "Get announcement",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "announcement",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Announcement detail"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update announcement",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "announcement",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Announcement updated"
+                    }
+                }
+            }
+        },
+        "/api/v1/reports/overview": {
+            "get": {
+                "summary": "Get report overview",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Report overview"
+                    }
+                }
+            }
+        },
+        "/api/v1/settings": {
+            "get": {
+                "summary": "Get settings",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Settings payload"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Update settings",
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Settings updated"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    }
+}

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\WebLoginRequest;
 use App\Models\AuditLog;
 use App\Models\User;
 use App\Services\AuditLogger;
@@ -17,12 +18,9 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
+    public function login(WebLoginRequest $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        $credentials = $request->validated();
 
         $logger = app(AuditLogger::class);
 
@@ -70,6 +68,10 @@ class AuthController extends Controller
             $logger->log('auth.login_success', $user, null, [
                 'role' => $user->role,
             ]);
+        }
+
+        if ($user->role === User::ROLE_SUPER_ADMIN) {
+            return redirect()->route('admin.home');
         }
 
         if ($user->role === User::ROLE_UNIVERSITY_ADMIN) {

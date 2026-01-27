@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\DormAdmin;
 use App\Models\Room;
 use App\Models\RoomAssignment;
 use App\Models\Student;
-use App\Services\AuditLogger;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -45,18 +46,41 @@ class RoomAssignmentService
                 $this->updateRoomStatus($existing->room_id);
             }
 
-            $assignment = RoomAssignment::create([
-                'student_id' => $student->id,
-                'room_id' => $room->id,
-                'active' => true,
-                'from_date' => now(),
-            ]);
+            try {
+                $assignment = RoomAssignment::create([
+                    'student_id' => $student->id,
+                    'room_id' => $room->id,
+                    'active' => true,
+                    'from_date' => now(),
+                ]);
+            } catch (QueryException $exception) {
+                if ($this->isActiveAssignmentConflict($exception)) {
+                    throw ValidationException::withMessages([
+                        'student_id' => ['Student already has an active room assignment.'],
+                    ]);
+                }
+
+                throw $exception;
+            }
 
             $this->updateRoomStatus($room->id);
             app(AuditLogger::class)->log('assign_student', $assignment, null, [
                 'student_id' => $student->id,
                 'room_id' => $room->id,
             ]);
+
+            $recipients = DormAdmin::where('dorm_id', $room->dorm_id)
+                ->with('user')
+                ->get()
+                ->pluck('user')
+                ->filter();
+
+            app(NotificationService::class)->notifyUsers(
+                $recipients,
+                'New room assignment',
+                $student->full_name . ' assigned to Room ' . $room->room_number . '.',
+                route('admin.dorm.rooms.show', $room)
+            );
 
             return $assignment;
         });
@@ -106,5 +130,19 @@ class RoomAssignmentService
 
         $room->status = $status;
         $room->save();
+    }
+
+    private function isActiveAssignmentConflict(QueryException $exception): bool
+    {
+        $message = $exception->getMessage();
+        $errorInfo = $exception->errorInfo;
+        $sqlState = $errorInfo[0] ?? null;
+        $driverCode = $errorInfo[1] ?? null;
+
+        if (is_string($message) && str_contains($message, 'room_assignments_active_student_unique')) {
+            return true;
+        }
+
+        return in_array($sqlState, ['23000', '23505'], true) || in_array($driverCode, [1062, 19], true);
     }
 }

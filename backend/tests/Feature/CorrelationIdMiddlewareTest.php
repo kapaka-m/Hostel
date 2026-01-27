@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Support\FeatureFlags;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -19,6 +20,8 @@ class CorrelationIdMiddlewareTest extends TestCase
             'value' => '1',
             'type' => 'bool',
         ]);
+
+        FeatureFlags::clearCache('correlation_ids');
 
         $user = User::factory()->create([
             'role' => User::ROLE_DORM_ADMIN,

@@ -20,6 +20,7 @@ class SystemSettingsSeeder extends Seeder
             ['key' => 'feature.admin_ip_allowlist', 'value' => '0', 'type' => 'bool'],
             ['key' => 'feature.suspicious_login_alerts', 'value' => '0', 'type' => 'bool'],
             ['key' => 'security.admin_ip_allowlist', 'value' => json_encode([]), 'type' => 'json'],
+            ['key' => 'activity.retention_days', 'value' => '90', 'type' => 'int'],
         ];
 
         foreach ($defaults as $setting) {

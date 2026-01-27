@@ -2,11 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\Announcement;
 use App\Models\Dorm;
 use App\Models\DormAdmin;
 use App\Models\Floor;
 use App\Models\Room;
 use App\Models\Student;
+use App\Models\Ticket;
+use App\Models\University;
 use App\Models\User;
 use App\Services\RoomAssignmentService;
 use Illuminate\Database\Seeder;
@@ -18,6 +21,29 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(SystemSettingsSeeder::class);
 
+        $university = University::firstOrCreate(
+            ['code' => 'DEFAULT'],
+            [
+                'name' => 'Default University',
+                'address' => null,
+                'contact_email' => null,
+                'contact_phone' => null,
+                'is_active' => true,
+            ]
+        );
+
+        $superAdmin = User::where('email', 'superadmin@test.com')->first();
+
+        if (!$superAdmin) {
+            $superAdmin = User::create([
+                'name' => 'Super Admin',
+                'email' => 'superadmin@test.com',
+                'password' => Hash::make('Super@12345'),
+                'role' => User::ROLE_SUPER_ADMIN,
+                'university_id' => $university->id,
+            ]);
+        }
+
         $universityAdmin = User::where('email', 'uniadmin@test.com')->first();
 
         if (!$universityAdmin) {
@@ -26,6 +52,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'uniadmin@test.com',
                 'password' => Hash::make('Uni@12345'),
                 'role' => User::ROLE_UNIVERSITY_ADMIN,
+                'university_id' => $university->id,
             ]);
         }
 
@@ -34,8 +61,13 @@ class DatabaseSeeder extends Seeder
 
         foreach ($dormNames as $name) {
             $dorms[$name] = Dorm::firstOrCreate(
-                ['name' => $name],
-                ['address' => null]
+                ['name' => $name, 'university_id' => $university->id],
+                [
+                    'address' => null,
+                    'code' => strtoupper(str_replace(' ', '_', $name)),
+                    'capacity' => 80,
+                    'status' => 'ACTIVE',
+                ]
             );
         }
 
@@ -49,6 +81,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'dormadmin@test.com',
                 'password' => Hash::make('Dorm@12345'),
                 'role' => User::ROLE_DORM_ADMIN,
+                'university_id' => $university->id,
             ]);
         }
 
@@ -98,6 +131,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'student1@test.com',
                 'password' => Hash::make('Stud@12345'),
                 'role' => User::ROLE_STUDENT,
+                'university_id' => $university->id,
             ]);
         }
 
@@ -118,8 +152,33 @@ class DatabaseSeeder extends Seeder
             ->first();
 
         if ($room101) {
-            (new RoomAssignmentService())->assignStudentToRoom($student, $room101);
+            (new RoomAssignmentService)->assignStudentToRoom($student, $room101);
         }
+
+        Ticket::firstOrCreate([
+            'subject' => 'Air conditioner leak',
+            'university_id' => $university->id,
+            'dorm_id' => $dormA->id,
+            'created_by' => $dormAdminUser->id,
+        ], [
+            'description' => 'AC leaking in room 101. Needs maintenance.',
+            'category' => 'Maintenance',
+            'priority' => 'HIGH',
+            'status' => 'OPEN',
+            'assigned_to' => $dormAdminUser->id,
+        ]);
+
+        Announcement::firstOrCreate([
+            'title' => 'Quiet hours reminder',
+            'university_id' => $university->id,
+            'dorm_id' => $dormA->id,
+        ], [
+            'created_by' => $universityAdmin->id,
+            'body' => 'Quiet hours are from 10 PM to 6 AM. Please be respectful.',
+            'audience' => 'DORM',
+            'status' => 'PUBLISHED',
+            'publish_at' => now(),
+        ]);
 
         $this->call(PermissionsSeeder::class);
     }

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kapaka.hostel.hostel"
+    namespace = "com.kapaka.hostel.hostel_mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,7 +20,8 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.kapaka.hostel.hostel"
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "com.kapaka.hostel.hostel_mobile"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -31,6 +32,7 @@ android {
 
     buildTypes {
         release {
+            // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }

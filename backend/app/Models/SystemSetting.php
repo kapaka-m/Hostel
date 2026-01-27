@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Schema;
 class SystemSetting extends Model
 {
     protected $primaryKey = 'key';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [

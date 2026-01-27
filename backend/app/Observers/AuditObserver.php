@@ -6,6 +6,7 @@ use App\Models\RecordHistory;
 use App\Services\AuditLogger;
 use App\Support\FeatureFlags;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class AuditObserver
@@ -43,11 +44,25 @@ class AuditObserver
         );
 
         if (FeatureFlags::enabled('audit_logs')) {
+            $actor = Auth::user();
+            $universityId = $actor?->university_id;
+
+            if (!$universityId) {
+                if (isset($model->university_id)) {
+                    $universityId = $model->university_id;
+                } elseif (method_exists($model, 'dorm')) {
+                    $universityId = $model->dorm?->university_id;
+                } elseif (method_exists($model, 'user')) {
+                    $universityId = $model->user?->university_id;
+                }
+            }
+
             RecordHistory::create([
                 'entity_type' => class_basename($model),
                 'entity_id' => $model->getKey(),
                 'changes_json' => $changes,
-                'actor_id' => auth()->id(),
+                'actor_id' => $actor?->id,
+                'university_id' => $universityId,
                 'created_at' => now(),
             ]);
         }

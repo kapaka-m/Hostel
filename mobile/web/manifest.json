@@ -1,11 +1,11 @@
 {
-    "name": "Hostel",
-    "short_name": "Hostel",
+    "name": "hostel_mobile",
+    "short_name": "hostel_mobile",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Hostel dorm management app.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

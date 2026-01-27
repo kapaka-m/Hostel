@@ -6,17 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Floor;
 use App\Models\Room;
 use App\Models\Student;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class DormDashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $dormId = Auth::user()?->dormAdmin?->dorm_id;
-
-        if (!$dormId) {
-            abort(403);
-        }
+        $dormId = $this->requireDormId($request);
 
         $floorCount = Floor::where('dorm_id', $dormId)->count();
         $roomCount = Room::where('dorm_id', $dormId)->count();

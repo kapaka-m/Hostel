@@ -18,12 +18,17 @@ class StudentPolicy
 
     public function view(User $user, Student $student): bool
     {
-        if ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)) {
+        if ($this->isSuper($user)) {
             return true;
         }
 
+        if ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)) {
+            return $this->dormMatchesUniversity($user, $student->dorm_id);
+        }
+
         if ($this->hasRole($user, User::ROLE_DORM_ADMIN)) {
-            return $this->dormId($user) === $student->dorm_id;
+            return $this->dormId($user) === $student->dorm_id
+                && $this->dormMatchesUniversity($user, $student->dorm_id);
         }
 
         if ($this->hasRole($user, User::ROLE_STUDENT)) {
@@ -35,12 +40,17 @@ class StudentPolicy
 
     public function create(User $user, ?int $dormId = null): bool
     {
-        if ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)) {
+        if ($this->isSuper($user)) {
             return true;
         }
 
+        if ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)) {
+            return $this->dormMatchesUniversity($user, $dormId);
+        }
+
         if ($this->hasRole($user, User::ROLE_DORM_ADMIN)) {
-            return $dormId === null || $this->dormId($user) === $dormId;
+            return ($dormId === null || $this->dormId($user) === $dormId)
+                && $this->dormMatchesUniversity($user, $dormId);
         }
 
         return false;
@@ -48,14 +58,28 @@ class StudentPolicy
 
     public function update(User $user, Student $student): bool
     {
-        return $this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)
-            || ($this->hasRole($user, User::ROLE_DORM_ADMIN) && $this->dormId($user) === $student->dorm_id);
+        if ($this->isSuper($user)) {
+            return true;
+        }
+
+        return ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)
+            && $this->dormMatchesUniversity($user, $student->dorm_id))
+            || ($this->hasRole($user, User::ROLE_DORM_ADMIN)
+                && $this->dormId($user) === $student->dorm_id
+                && $this->dormMatchesUniversity($user, $student->dorm_id));
     }
 
     public function delete(User $user, Student $student): bool
     {
-        return $this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)
-            || ($this->hasRole($user, User::ROLE_DORM_ADMIN) && $this->dormId($user) === $student->dorm_id);
+        if ($this->isSuper($user)) {
+            return true;
+        }
+
+        return ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)
+            && $this->dormMatchesUniversity($user, $student->dorm_id))
+            || ($this->hasRole($user, User::ROLE_DORM_ADMIN)
+                && $this->dormId($user) === $student->dorm_id
+                && $this->dormMatchesUniversity($user, $student->dorm_id));
     }
 
     public function viewMyRoom(User $user, Student $student): bool

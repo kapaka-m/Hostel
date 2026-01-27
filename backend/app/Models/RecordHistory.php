@@ -13,6 +13,7 @@ class RecordHistory extends Model
         'entity_id',
         'changes_json',
         'actor_id',
+        'university_id',
         'created_at',
     ];
 
@@ -24,5 +25,10 @@ class RecordHistory extends Model
     public function actor()
     {
         return $this->belongsTo(User::class, 'actor_id');
+    }
+
+    public function university()
+    {
+        return $this->belongsTo(University::class);
     }
 }

@@ -5,7 +5,7 @@
         <h2>Housing Dashboard</h2>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.dorm.floors.index') }}" class="btn btn-outline-primary btn-sm">Floors</a>
-            <a href="{{ route('admin.dorm.rooms.index') }}" class="btn btn-outline-primary btn-sm">Rooms</a>
+            <a href="{{ route('admin.dorm.rooms.index') }}" class="btn btn-primary btn-sm">Rooms</a>
             <a href="{{ route('admin.dorm.students.index') }}" class="btn btn-outline-primary btn-sm">Students</a>
         </div>
     </div>

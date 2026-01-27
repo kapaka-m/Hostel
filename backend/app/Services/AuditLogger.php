@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AuditLog;
 use App\Support\FeatureFlags;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class AuditLogger
 {
@@ -20,9 +21,22 @@ class AuditLogger
         }
 
         $request = app()->bound('request') ? request() : null;
+        $actor = Auth::user();
+        $universityId = $actor?->university_id;
+
+        if (!$universityId && $entity) {
+            if (isset($entity->university_id)) {
+                $universityId = $entity->university_id;
+            } elseif (method_exists($entity, 'dorm')) {
+                $universityId = $entity->dorm?->university_id;
+            } elseif (method_exists($entity, 'user')) {
+                $universityId = $entity->user?->university_id;
+            }
+        }
 
         AuditLog::create([
-            'actor_id' => auth()->id(),
+            'actor_id' => $actor?->id,
+            'university_id' => $universityId,
             'action' => $action,
             'entity_type' => $entity ? class_basename($entity) : 'system',
             'entity_id' => $entity?->getKey(),

@@ -9,27 +9,26 @@ use Illuminate\Http\Request;
 
 class DormFloorController extends Controller
 {
-    protected function dormId(Request $request): int
-    {
-        $dormId = $request->user()?->dormAdmin?->dorm_id;
-
-        if (!$dormId) {
-            abort(403);
-        }
-
-        return $dormId;
-    }
-
     public function index(Request $request)
     {
         $this->authorizeIfEnabled('viewAny', Floor::class);
 
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
-        $floors = Floor::where('dorm_id', $dormId)->orderBy('number')->get();
+        $query = Floor::where('dorm_id', $dormId)->withCount('rooms');
+
+        if ($request->filled('q')) {
+            $term = $request->input('q');
+            $query->where('number', 'like', '%' . $term . '%');
+        }
+
+        $floors = $query->orderBy('number')->paginate(15)->withQueryString();
 
         return view('admin.dorm.floors.index', [
             'floors' => $floors,
+            'filters' => [
+                'q' => $request->input('q', ''),
+            ],
         ]);
     }
 
@@ -38,13 +37,13 @@ class DormFloorController extends Controller
         $this->authorizeIfEnabled('create', Floor::class);
 
         return view('admin.dorm.floors.form', [
-            'floor' => new Floor(),
+            'floor' => new Floor,
         ]);
     }
 
     public function store(FloorRequest $request)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         $this->authorizeIfEnabled('create', [Floor::class, $dormId]);
 
@@ -62,7 +61,7 @@ class DormFloorController extends Controller
 
     public function edit(Request $request, Floor $floor)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($floor->dorm_id !== $dormId) {
             abort(403);
@@ -77,7 +76,7 @@ class DormFloorController extends Controller
 
     public function update(FloorRequest $request, Floor $floor)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($floor->dorm_id !== $dormId) {
             abort(403);
@@ -93,7 +92,7 @@ class DormFloorController extends Controller
 
     public function destroy(Request $request, Floor $floor)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($floor->dorm_id !== $dormId) {
             abort(403);
@@ -110,5 +109,34 @@ class DormFloorController extends Controller
 
         return redirect()->route('admin.dorm.floors.index')
             ->with('success', 'Floor deleted successfully.');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $dormId = $this->requireDormId($request);
+        $this->authorizeIfEnabled('delete', Floor::class);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:floors,id'],
+        ]);
+
+        $floors = Floor::where('dorm_id', $dormId)
+            ->whereIn('id', $data['ids'])
+            ->get();
+
+        $blocked = $floors->filter(fn($floor) => $floor->rooms()->exists());
+
+        if ($blocked->isNotEmpty()) {
+            return redirect()->route('admin.dorm.floors.index')
+                ->with('error', 'Some floors have rooms and cannot be deleted.');
+        }
+
+        Floor::where('dorm_id', $dormId)
+            ->whereIn('id', $floors->pluck('id'))
+            ->delete();
+
+        return redirect()->route('admin.dorm.floors.index')
+            ->with('success', 'Selected floors deleted successfully.');
     }
 }

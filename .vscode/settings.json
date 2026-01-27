@@ -1,38 +1,63 @@
 {
-  "files.associations": {
-    "**/.dart_tool/version": "plaintext"
+  "editor.detectIndentation": true,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 4,
+  "editor.rulers": [
+    100
+  ],
+  "editor.wordWrap": "on",
+  "editor.renderWhitespace": "boundary",
+  "editor.minimap.enabled": false,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
   },
 
-  "C_Cpp.files.exclude": {
-    "**/.dart_tool/**": true,
-    "**/linux/**": true,
-    "**/ios/**": true,
-    "**/macos/**": true
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.eol": "\n",
+
+  "dart.lineLength": 100,
+  "[dart]": {
+    "editor.formatOnSave": true
   },
 
   "files.exclude": {
-    "**/linux/**": true,
-    "**/ios/**": true,
-    "**/macos/**": true
+    ".git": true,
+    "mobile/.dart_tool": true,
+    "mobile/build": true,
+    "mobile/android/.gradle": true,
+    "mobile/android/app/.cxx": true,
+    "mobile/ios/Pods": true,
+    "mobile/windows/flutter/ephemeral": true
   },
 
   "search.exclude": {
-    "**/linux/**": true,
-    "**/ios/**": true,
-    "**/macos/**": true
+    ".git": true,
+    "mobile/.dart_tool": true,
+    "mobile/build": true,
+    "mobile/android/.gradle": true,
+    "mobile/android/app/.cxx": true,
+    "mobile/ios/Pods": true,
+    "mobile/windows/flutter/ephemeral": true
   },
 
   "files.watcherExclude": {
-    "**/linux/**": true,
-    "**/ios/**": true,
-    "**/macos/**": true
+    ".git": true,
+    "mobile/.dart_tool": true,
+    "mobile/build": true,
+    "mobile/android/.gradle": true,
+    "mobile/android/app/.cxx": true,
+    "mobile/ios/Pods": true,
+    "mobile/windows/flutter/ephemeral": true
   },
 
-  "java.project.excludedPaths": [
-    "**/.dart_tool/**",
-    "**/build/**",
-    "**/android/.gradle/**",
-    "**/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java"
+  "intelephense.environment.includePaths": [
+    "backend/vendor",
+    "backend/app",
+    "backend/bootstrap"
   ],
+
   "cmake.ignoreCMakeListsMissing": true
 }

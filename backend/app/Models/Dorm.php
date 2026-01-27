@@ -10,9 +10,22 @@ class Dorm extends Model
     use HasFactory;
 
     protected $fillable = [
+        'university_id',
+        'code',
         'name',
         'address',
+        'capacity',
+        'status',
+        'contact_name',
+        'contact_email',
+        'contact_phone',
+        'notes',
     ];
+
+    public function university()
+    {
+        return $this->belongsTo(University::class);
+    }
 
     public function floors()
     {

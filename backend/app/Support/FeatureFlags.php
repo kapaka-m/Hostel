@@ -18,13 +18,14 @@ class FeatureFlags
 
         $ttl = (int) config('feature-flags.cache_ttl', 30);
 
-        return Cache::remember(self::cacheKey($key), $ttl, fn () => self::resolve($key));
+        return Cache::remember(self::cacheKey($key), $ttl, fn() => self::resolve($key));
     }
 
     public static function clearCache(?string $flag = null): void
     {
         if ($flag === null) {
             Cache::flush();
+
             return;
         }
 

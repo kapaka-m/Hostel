@@ -18,12 +18,17 @@ class FloorPolicy
 
     public function view(User $user, Floor $floor): bool
     {
-        if ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)) {
+        if ($this->isSuper($user)) {
             return true;
         }
 
+        if ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)) {
+            return $this->dormMatchesUniversity($user, $floor->dorm_id);
+        }
+
         if ($this->hasRole($user, User::ROLE_DORM_ADMIN)) {
-            return $this->dormId($user) === $floor->dorm_id;
+            return $this->dormId($user) === $floor->dorm_id
+                && $this->dormMatchesUniversity($user, $floor->dorm_id);
         }
 
         return false;
@@ -31,12 +36,17 @@ class FloorPolicy
 
     public function create(User $user, ?int $dormId = null): bool
     {
-        if ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)) {
+        if ($this->isSuper($user)) {
             return true;
         }
 
+        if ($this->hasRole($user, User::ROLE_UNIVERSITY_ADMIN)) {
+            return $this->dormMatchesUniversity($user, $dormId);
+        }
+
         if ($this->hasRole($user, User::ROLE_DORM_ADMIN)) {
-            return $dormId === null || $this->dormId($user) === $dormId;
+            return ($dormId === null || $this->dormId($user) === $dormId)
+                && $this->dormMatchesUniversity($user, $dormId);
         }
 
         return false;

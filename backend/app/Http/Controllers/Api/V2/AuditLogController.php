@@ -11,7 +11,10 @@ class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
+        $universityId = $this->requireUniversityId($request);
+
         $logs = AuditLog::with('actor')
+            ->where('university_id', $universityId)
             ->orderByDesc('created_at')
             ->paginate(50);
 

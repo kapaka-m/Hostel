@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentRequest;
 use App\Http\Resources\StudentResource;
+use App\Models\Dorm;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\RoomAssignmentService;
@@ -16,22 +17,11 @@ use Spatie\Permission\Models\Role;
 
 class StudentController extends Controller
 {
-    protected function dormId(Request $request): int
-    {
-        $dormId = $request->user()?->dormAdmin?->dorm_id;
-
-        if (!$dormId) {
-            abort(403, 'Dorm admin profile missing.');
-        }
-
-        return $dormId;
-    }
-
     public function index(Request $request)
     {
         $this->authorizeIfEnabled('viewAny', Student::class);
 
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         $students = Student::where('dorm_id', $dormId)
             ->with('user')
@@ -43,18 +33,20 @@ class StudentController extends Controller
 
     public function store(StudentRequest $request)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
         $this->authorizeIfEnabled('create', [Student::class, $dormId]);
 
         $data = $request->validated();
 
         $password = Str::random(10);
+        $dorm = Dorm::findOrFail($dormId);
 
         $user = User::create([
             'name' => $data['full_name'],
             'email' => $data['email'],
             'password' => Hash::make($password),
             'role' => User::ROLE_STUDENT,
+            'university_id' => $dorm->university_id,
         ]);
 
         if (FeatureFlags::enabled('permissions')) {
@@ -82,7 +74,7 @@ class StudentController extends Controller
 
     public function show(Request $request, Student $student)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($student->dorm_id !== $dormId) {
             abort(403);
@@ -97,7 +89,7 @@ class StudentController extends Controller
 
     public function update(StudentRequest $request, Student $student)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($student->dorm_id !== $dormId) {
             abort(403);
@@ -140,7 +132,7 @@ class StudentController extends Controller
 
     public function destroy(Request $request, Student $student, RoomAssignmentService $service)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($student->dorm_id !== $dormId) {
             abort(403);

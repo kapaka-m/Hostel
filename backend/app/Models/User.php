@@ -12,11 +12,15 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     public const ROLE_UNIVERSITY_ADMIN = 'UNIVERSITY_ADMIN';
+
     public const ROLE_DORM_ADMIN = 'DORM_ADMIN';
+
     public const ROLE_STUDENT = 'STUDENT';
+
+    public const ROLE_SUPER_ADMIN = 'SUPER_ADMIN';
 
     /**
      * The attributes that are mass assignable.
@@ -28,8 +32,11 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'university_id',
         'is_active',
         'frozen_at',
+        'ui_theme',
+        'ui_sidebar_collapsed',
     ];
 
     /**
@@ -54,6 +61,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'frozen_at' => 'datetime',
+            'ui_sidebar_collapsed' => 'boolean',
         ];
     }
 
@@ -70,6 +78,11 @@ class User extends Authenticatable
     public function dormAdmin()
     {
         return $this->hasOne(DormAdmin::class);
+    }
+
+    public function university()
+    {
+        return $this->belongsTo(University::class);
     }
 
     public function student()

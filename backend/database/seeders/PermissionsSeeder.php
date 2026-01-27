@@ -43,12 +43,12 @@ class PermissionsSeeder extends Seeder
 
         User::where('role', User::ROLE_UNIVERSITY_ADMIN)
             ->get()
-            ->each(fn (User $user) => $user->syncRoles([$universityRole->name]));
+            ->each(fn(User $user) => $user->syncRoles([$universityRole->name]));
         User::where('role', User::ROLE_DORM_ADMIN)
             ->get()
-            ->each(fn (User $user) => $user->syncRoles([$dormRole->name]));
+            ->each(fn(User $user) => $user->syncRoles([$dormRole->name]));
         User::where('role', User::ROLE_STUDENT)
             ->get()
-            ->each(fn (User $user) => $user->syncRoles([$studentRole->name]));
+            ->each(fn(User $user) => $user->syncRoles([$studentRole->name]));
     }
 }

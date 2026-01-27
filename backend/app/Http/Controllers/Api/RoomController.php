@@ -15,22 +15,11 @@ use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
-    protected function dormId(Request $request): int
-    {
-        $dormId = $request->user()?->dormAdmin?->dorm_id;
-
-        if (!$dormId) {
-            abort(403, 'Dorm admin profile missing.');
-        }
-
-        return $dormId;
-    }
-
     public function index(Request $request)
     {
         $this->authorizeIfEnabled('viewAny', Room::class);
 
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         $query = Room::where('dorm_id', $dormId)->withCount('activeAssignments');
 
@@ -45,7 +34,7 @@ class RoomController extends Controller
 
     public function store(RoomRequest $request)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
         $this->authorizeIfEnabled('create', [Room::class, $dormId]);
 
         $data = $request->validated();
@@ -69,7 +58,7 @@ class RoomController extends Controller
 
     public function show(Request $request, Room $room)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($room->dorm_id !== $dormId) {
             abort(403);
@@ -84,7 +73,7 @@ class RoomController extends Controller
 
     public function update(RoomRequest $request, Room $room, RoomAssignmentService $service)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($room->dorm_id !== $dormId) {
             abort(403);
@@ -119,7 +108,7 @@ class RoomController extends Controller
 
     public function destroy(Request $request, Room $room)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($room->dorm_id !== $dormId) {
             abort(403);
@@ -144,7 +133,7 @@ class RoomController extends Controller
 
     public function assignStudent(AssignStudentRequest $request, Room $room, RoomAssignmentService $service)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($room->dorm_id !== $dormId) {
             abort(403);
@@ -167,7 +156,7 @@ class RoomController extends Controller
 
     public function occupants(Request $request, Room $room)
     {
-        $dormId = $this->dormId($request);
+        $dormId = $this->requireDormId($request);
 
         if ($room->dorm_id !== $dormId) {
             abort(403);

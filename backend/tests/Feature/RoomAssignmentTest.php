@@ -7,6 +7,7 @@ use App\Models\DormAdmin;
 use App\Models\Floor;
 use App\Models\Room;
 use App\Models\Student;
+use App\Models\University;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +20,12 @@ class RoomAssignmentTest extends TestCase
 
     public function test_dorm_admin_can_assign_student_to_room(): void
     {
-        $dorm = Dorm::create(['name' => 'Dorm A', 'address' => null]);
+        $university = University::create(['name' => 'Uni A', 'code' => 'UNIA']);
+        $dorm = Dorm::create([
+            'name' => 'Dorm A',
+            'address' => null,
+            'university_id' => $university->id,
+        ]);
         $floor = Floor::create([
             'dorm_id' => $dorm->id,
             'number' => 1,
@@ -38,6 +44,7 @@ class RoomAssignmentTest extends TestCase
         $admin = User::factory()->create([
             'password' => Hash::make('Admin123!'),
             'role' => User::ROLE_DORM_ADMIN,
+            'university_id' => $university->id,
         ]);
         DormAdmin::create([
             'user_id' => $admin->id,
@@ -47,6 +54,7 @@ class RoomAssignmentTest extends TestCase
         $studentUser = User::factory()->create([
             'password' => Hash::make('Student123!'),
             'role' => User::ROLE_STUDENT,
+            'university_id' => $university->id,
         ]);
         $student = Student::create([
             'user_id' => $studentUser->id,
@@ -75,8 +83,17 @@ class RoomAssignmentTest extends TestCase
 
     public function test_dorm_admin_only_sees_own_rooms(): void
     {
-        $dormA = Dorm::create(['name' => 'Dorm A', 'address' => null]);
-        $dormB = Dorm::create(['name' => 'Dorm B', 'address' => null]);
+        $university = University::create(['name' => 'Uni A', 'code' => 'UNIA']);
+        $dormA = Dorm::create([
+            'name' => 'Dorm A',
+            'address' => null,
+            'university_id' => $university->id,
+        ]);
+        $dormB = Dorm::create([
+            'name' => 'Dorm B',
+            'address' => null,
+            'university_id' => $university->id,
+        ]);
 
         $floorA = Floor::create([
             'dorm_id' => $dormA->id,
@@ -111,6 +128,7 @@ class RoomAssignmentTest extends TestCase
         $admin = User::factory()->create([
             'password' => Hash::make('Admin123!'),
             'role' => User::ROLE_DORM_ADMIN,
+            'university_id' => $university->id,
         ]);
         DormAdmin::create([
             'user_id' => $admin->id,
@@ -129,8 +147,17 @@ class RoomAssignmentTest extends TestCase
 
     public function test_dorm_admin_cannot_assign_student_in_other_dorm(): void
     {
-        $dormA = Dorm::create(['name' => 'Dorm A', 'address' => null]);
-        $dormB = Dorm::create(['name' => 'Dorm B', 'address' => null]);
+        $university = University::create(['name' => 'Uni A', 'code' => 'UNIA']);
+        $dormA = Dorm::create([
+            'name' => 'Dorm A',
+            'address' => null,
+            'university_id' => $university->id,
+        ]);
+        $dormB = Dorm::create([
+            'name' => 'Dorm B',
+            'address' => null,
+            'university_id' => $university->id,
+        ]);
 
         $floorA = Floor::create([
             'dorm_id' => $dormA->id,
@@ -158,6 +185,7 @@ class RoomAssignmentTest extends TestCase
         $admin = User::factory()->create([
             'password' => Hash::make('Admin123!'),
             'role' => User::ROLE_DORM_ADMIN,
+            'university_id' => $university->id,
         ]);
         DormAdmin::create([
             'user_id' => $admin->id,
@@ -167,6 +195,7 @@ class RoomAssignmentTest extends TestCase
         $studentUser = User::factory()->create([
             'password' => Hash::make('Student123!'),
             'role' => User::ROLE_STUDENT,
+            'university_id' => $university->id,
         ]);
         $student = Student::create([
             'user_id' => $studentUser->id,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Support\FeatureFlags;
 use Closure;
 use Illuminate\Http\Request;
@@ -22,6 +23,10 @@ class RoleMiddleware
             }
 
             return redirect()->route('login');
+        }
+
+        if ($user->role === User::ROLE_SUPER_ADMIN) {
+            return $next($request);
         }
 
         $hasSpatieRoles = FeatureFlags::enabled('permissions')

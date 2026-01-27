@@ -10,6 +10,7 @@ class AuditLog extends Model
 
     protected $fillable = [
         'actor_id',
+        'university_id',
         'action',
         'entity_type',
         'entity_id',
@@ -30,5 +31,10 @@ class AuditLog extends Model
     public function actor()
     {
         return $this->belongsTo(User::class, 'actor_id');
+    }
+
+    public function university()
+    {
+        return $this->belongsTo(University::class);
     }
 }
