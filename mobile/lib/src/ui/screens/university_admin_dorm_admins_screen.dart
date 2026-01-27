@@ -53,13 +53,21 @@ class _UniversityAdminDormAdminsScreenState extends State<UniversityAdminDormAdm
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
+      if (!mounted) {
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dorm admin invited.')));
       _formKey.currentState?.reset();
       setState(() => _selectedDormId = null);
     } catch (error) {
+      if (!mounted) {
+        return;
+      }
       setState(() => _errorMessage = 'Unable to invite dorm admin.');
     } finally {
-      setState(() => _isSubmitting = false);
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 

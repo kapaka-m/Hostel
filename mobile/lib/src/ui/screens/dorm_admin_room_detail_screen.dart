@@ -43,6 +43,9 @@ class _DormAdminRoomDetailScreenState extends State<DormAdminRoomDetailScreen> {
     setState(() => _isAssigning = true);
     try {
       await provider.assignStudent(widget.roomId, _selectedStudentId!);
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _occupantsFuture = context.read<RoomRepository>().fetchOccupants(widget.roomId);
       });
@@ -50,10 +53,15 @@ class _DormAdminRoomDetailScreenState extends State<DormAdminRoomDetailScreen> {
         const SnackBar(content: Text('Student assigned successfully.')),
       );
     } catch (error) {
+      if (!mounted) {
+        return;
+      }
       final message = error is ApiException ? error.message : 'Assignment failed';
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     } finally {
-      setState(() => _isAssigning = false);
+      if (mounted) {
+        setState(() => _isAssigning = false);
+      }
     }
   }
 

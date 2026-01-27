@@ -56,6 +56,9 @@ class _UniversityAdminDormsScreenState extends State<UniversityAdminDormsScreen>
     };
 
     await _provider.submitDorm(payload);
+    if (!mounted) {
+      return;
+    }
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dorm saved.')));
     _formKey.currentState?.reset();
   }
